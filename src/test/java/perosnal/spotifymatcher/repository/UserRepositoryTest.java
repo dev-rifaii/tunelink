@@ -5,8 +5,10 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import perosnal.spotifymatcher.TestToken;
 import perosnal.spotifymatcher.model.User;
 
 import java.util.ArrayList;
@@ -48,7 +50,6 @@ class UserRepositoryTest {
         assertFalse(estonianUsers.stream().anyMatch("test3"::equals));
     }
 
-
     @Test
     void shouldGetUserById() {
         User user = userRepository.getById("0Rgn0_first_id");
@@ -61,13 +62,6 @@ class UserRepositoryTest {
         assertTrue(tracks.size() > 0);
     }
 
-    @Test
-    void shouldFindUsersSharingTrack() {
-        List<User> users = userRepository.findUsersBySharedTracks("track100");
-        System.out.println(users.size());
-        assertTrue(users.size() > 0);
-
-    }
 
     @Test
     void shouldGetUserByAccessToken() {
@@ -77,13 +71,10 @@ class UserRepositoryTest {
 
 
     @Test
-    void testingQuery() {
-        userRepository.getMatches("31hifomfxj7ovtmqul4commjwseu", 1);
-        List<String> list = userRepository.getNative("31hifomfxj7ovtmqul4commjwseu", 1);
-        for (String string : list) {
-            System.out.println("Strring= " + string);
-        }
-
+    void matching() {
+        List<User> matches = userRepository.getMatches("0Rgn0_first_id", 1);
+        assertTrue(matches.size() > 0);
     }
 
 }
+

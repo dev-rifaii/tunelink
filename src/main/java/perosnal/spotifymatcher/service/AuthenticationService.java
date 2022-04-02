@@ -24,7 +24,6 @@ public class AuthenticationService {
 
     private final SpotifyAuthentication spotifyAuthentication;
     private final UserRepository userRepository;
-    private final UserService userService;
     private final SpotifyAPI spotifyAPI;
 
     public String authenticate() {

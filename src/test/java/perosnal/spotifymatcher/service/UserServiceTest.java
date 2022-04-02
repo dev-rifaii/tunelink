@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import perosnal.spotifymatcher.TestToken;
 import perosnal.spotifymatcher.model.User;
 import perosnal.spotifymatcher.repository.UserRepository;
 
@@ -40,16 +41,16 @@ class UserServiceTest {
     }
 
     @Test
-    void shouldFindOneMatch() {
-        List<User> matches = userService.matchByTracksAndCountry("119Rgn119_first_access_token");
-        assertTrue(matches.size() == 1);
+    void shouldPersistMatchesAfterFindingThem() {
+        User user = userRepository.getById("10002Rgn10002_first_id");
+        List<User> matches = userService.match(user.getToken().getAccessToken());
+        assertTrue(user.getMatches().size() > 0);
     }
 
     @Test
-    void shouldNotFindMatch() {
-        User user = userRepository.findByTokenAccessToken("119Rgn119_first_access_token");
-        List<User> firstMatchingAttempt = userService.matchByTracksAndCountry(user.getToken().getAccessToken());
-        List<User> secondMatchingAttempt = userService.matchByTracksAndCountry(user.getToken().getAccessToken());
-        Assertions.assertThat(firstMatchingAttempt.size() > 0 && secondMatchingAttempt.size() == 0);
+    void shouldReturnFalseWhenFindingSameMatches() {
+        User user = userRepository.getById("10002Rgn10002_first_id");
+        List<User> matches = userService.match(user.getToken().getAccessToken());
+        assertFalse(userService.matchesAreNew(user, matches));
     }
 }

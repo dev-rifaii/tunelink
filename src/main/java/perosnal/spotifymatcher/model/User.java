@@ -37,7 +37,7 @@ public class User {
     @ElementCollection
     @CollectionTable(name = "matches",
             joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "match")
+    @Column(name = "`match`")
     @JsonIgnore
     private List<String> matches;
 

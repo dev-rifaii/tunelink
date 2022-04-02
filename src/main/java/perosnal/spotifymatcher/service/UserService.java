@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,83 +25,40 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+
     public List<User> match(String accessToken) {
+        User user = userRepository.findByTokenAccessToken(accessToken);
+        List<User> matches = userRepository.getMatches(user.getId(), 3);
+        if (matchesAreNew(user, matches)) {
+            user.getMatches().addAll(matches.stream().map(User::getId).collect(Collectors.toList()));
+            userRepository.save(user);
+            return matches;
+        }
+        return null;
+    }
+
+
+    public boolean matchesAreNew(User user, List<User> matches) {
+        if (user.getMatches().stream().anyMatch(matches.stream().map(User::getId).collect(Collectors.toSet())::contains)) {
+            return false;
+        }
+        return true;
+    }
+
+    public List<User> getMatches(String accessToken) {
+        User user = userRepository.findByTokenAccessToken(accessToken);
         List<User> matches = new ArrayList<>();
-
-        User user = userRepository.findById(userRepository.findByTokenAccessToken(accessToken).getId()).get();
-
-        List<String> topTracks = user.getTracks();
-        List<String> afterRetain = new ArrayList<>(topTracks);
-        for (String track : topTracks) {
-            for (User potentialMatchingUser : userRepository.findUsersBySharedTracks(track)) {
-                if (!potentialMatchingUser.equals(user) && !matches.contains(potentialMatchingUser) && !user.getMatches().contains(potentialMatchingUser.getId())) {
-                    afterRetain.retainAll(potentialMatchingUser.getTracks());
-                    if (afterRetain.size() >= 1) {
-                        matches.add(potentialMatchingUser);
-                        user.getMatches().add(potentialMatchingUser.getId());
-                    }
-                }
-            }
+        for (String match : user.getMatches()) {
+            matches.add(userRepository.findById(match).get());
         }
         return matches;
     }
 
-
-    public List<User> matchByTracksAndCountry(String accessToken) {
-        List<User> matches = new ArrayList<>();
-
-        User user = userRepository.findById(userRepository.findByTokenAccessToken(accessToken).getId()).get();
-
-        List<User> locals = userRepository.findByCountry(user.getCountry());
-        List<String> topTracks = user.getTracks();
-        List<String> afterRetain = new ArrayList<>(topTracks);
-        for (String track : topTracks) {
-            for (User potentialMatchingUser : locals) {
-                if (!potentialMatchingUser.equals(user) && !matches.contains(potentialMatchingUser) && !user.getMatches().contains(potentialMatchingUser.getId())) {
-                    afterRetain.retainAll(potentialMatchingUser.getTracks());
-                    if (afterRetain.size() >= 2) {
-                        matches.add(potentialMatchingUser);
-                        user.getMatches().add(potentialMatchingUser.getId());
-
-                    }
-                }
-            }
-        }
-
-        return matches;
-
-    }
-
-    public String getId(String accessToken) {
-        User user = userRepository.findByTokenAccessToken(accessToken);
-        return user.getId();
-    }
-
-
-    public String getEmail(String accessToken) {
-        User user = userRepository.findByTokenAccessToken(accessToken);
-        return user.getEmail();
-    }
-
-    public String getCountry(String accessToken) {
-        User user = userRepository.findByTokenAccessToken(accessToken);
-        return user.getCountry();
-    }
 
     public List<String> getTopTracks(String accessToken) {
         User user = userRepository.findByTokenAccessToken(accessToken);
         return user.getTracks();
 
-    }
-
-    public List<String> getTopArtists(String accessToken) {
-        User user = userRepository.findByTokenAccessToken(accessToken);
-        return user.getArtists();
-    }
-
-    public List<String> getMatches(String accessToken) {
-        User user = userRepository.findByTokenAccessToken(accessToken);
-        return user.getMatches();
     }
 
 

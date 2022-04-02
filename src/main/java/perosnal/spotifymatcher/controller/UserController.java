@@ -31,7 +31,7 @@ public class UserController {
     }
 
     @GetMapping("/matches")
-    public List<String> getMatches(@RequestHeader("Authorization") String token) throws IOException, URISyntaxException, InterruptedException {
+    public List<User> getMatches(@RequestHeader("Authorization") String token) throws IOException, URISyntaxException, InterruptedException {
         return userService.getMatches(token.substring(7));
     }
 }
