@@ -18,6 +18,7 @@ import java.net.URISyntaxException;
 public class AuthenticationController {
 
     private final AuthenticationService spotifyAuthentication;
+    private final HttpServletResponse response;
 
     @GetMapping("/auth")
     public void auth(HttpServletResponse response) throws IOException{
@@ -26,6 +27,7 @@ public class AuthenticationController {
 
     @GetMapping("/callback")
     public Token callback(@RequestParam String code) throws URISyntaxException, IOException, InterruptedException {
+//        response.setHeader("Set-Cookie", "Hello=world");
         return spotifyAuthentication.callback(code);
     }
 

@@ -20,6 +20,8 @@ public class User {
 
     private String country;
 
+    private String biography;
+
     @ElementCollection
     @CollectionTable(name = "user_top_tracks",
             joinColumns = @JoinColumn(name = "user_id"))
@@ -41,8 +43,15 @@ public class User {
     @JsonIgnore
     private List<String> matches;
 
+    @ElementCollection
+    @CollectionTable(name = "blocked_users",
+            joinColumns = @JoinColumn(name = "blocker_id"))
+    @Column(name = "blocked_id")
     @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
+    private List<String> blocked;
+
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private Token token;
 }
