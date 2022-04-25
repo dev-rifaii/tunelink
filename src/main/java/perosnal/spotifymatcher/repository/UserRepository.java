@@ -3,10 +3,8 @@ package perosnal.spotifymatcher.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import perosnal.spotifymatcher.model.User;
 
-import java.lang.annotation.Native;
 import java.util.List;
 
 @Repository
@@ -16,10 +14,6 @@ public interface UserRepository extends JpaRepository<User, String> {
     @Query("select t from User u JOIN u.tracks t "
             + "WHERE u.id =?1 ")
     List<String> findTracksById(String id);
-
-//    @Query("select u from User u JOIN u.tracks t "
-//            + "WHERE t= ?1")
-//    List<User> findUsersBySharedTracks(String track);
 
     List<User> findByCountry(String country);
 

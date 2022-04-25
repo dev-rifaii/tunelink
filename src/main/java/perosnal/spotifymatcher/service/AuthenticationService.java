@@ -25,6 +25,8 @@ public class AuthenticationService {
     private final SpotifyAuthentication spotifyAuthentication;
     private final UserRepository userRepository;
     private final SpotifyAPI spotifyAPI;
+    private final ObjectMapper objectMapper;
+
 
     public String authenticate() {
         return spotifyAuthentication.authenticate();
@@ -43,13 +45,12 @@ public class AuthenticationService {
     }
 
     public User fetchUserFromSpotifyApi(Token token) throws IOException, URISyntaxException, InterruptedException {
-        ObjectMapper objectMapper = new ObjectMapper();
         JsonNode userNode = objectMapper.readValue(spotifyAPI.getProfile(token.getAccessToken()), ObjectNode.class);
         JsonNode topTracksNode = objectMapper.readTree(spotifyAPI.getTopTracks(token.getAccessToken())).get("items");
         JsonNode topArtistsNode = objectMapper.readTree(spotifyAPI.getTopArtists(token.getAccessToken())).get("items");
         token.setId(userNode.get("id").asText());
 
-        User user = User.builder()
+        return User.builder()
                 .id(userNode.get("id").asText())
                 .country(userNode.get("country").asText())
                 .email(userNode.get("email").asText())
@@ -57,7 +58,6 @@ public class AuthenticationService {
                 .artists(extractItemsFromJsonNode(topArtistsNode))
                 .token(token)
                 .build();
-        return user;
     }
 
     public List<String> extractItemsFromJsonNode(JsonNode node) {

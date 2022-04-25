@@ -1,10 +1,7 @@
 package perosnal.spotifymatcher.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import perosnal.spotifymatcher.model.Token;
 import perosnal.spotifymatcher.service.AuthenticationService;
 
@@ -12,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-@RequestMapping("/test")
+@RequestMapping("/authentication")
 @RequiredArgsConstructor
 @RestController
 public class AuthenticationController {
@@ -20,15 +17,19 @@ public class AuthenticationController {
     private final AuthenticationService spotifyAuthentication;
     private final HttpServletResponse response;
 
+    @CrossOrigin
     @GetMapping("/auth")
-    public void auth(HttpServletResponse response) throws IOException{
+    public void auth(HttpServletResponse response) throws IOException {
         response.sendRedirect(spotifyAuthentication.authenticate());
     }
 
+    @CrossOrigin
     @GetMapping("/callback")
-    public Token callback(@RequestParam String code) throws URISyntaxException, IOException, InterruptedException {
-//        response.setHeader("Set-Cookie", "Hello=world");
-        return spotifyAuthentication.callback(code);
+    public Token callback(@RequestParam String code, HttpServletResponse redResponse) throws URISyntaxException, IOException, InterruptedException {
+        Token token = spotifyAuthentication.callback(code);
+        response.setHeader("Set-Cookie", "Token=" + token.getAccessToken() + "; domain=localhost.com");
+        redResponse.sendRedirect("http://localhost.com:3000/home");
+        return token;
     }
 
 }

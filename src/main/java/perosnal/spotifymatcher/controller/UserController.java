@@ -2,22 +2,21 @@ package perosnal.spotifymatcher.controller;
 
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import perosnal.spotifymatcher.model.User;
 import perosnal.spotifymatcher.service.UserService;
+import perosnal.spotifymatcher.util.AuthorizedActionResult;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Collections;
+
 import java.util.List;
+
 
 import static org.springframework.http.ResponseEntity.badRequest;
 import static org.springframework.http.ResponseEntity.noContent;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -25,20 +24,18 @@ public class UserController {
 
     @GetMapping("/match")
     public ResponseEntity<?> match(@RequestHeader("Authorization") String token) {
-        List<User> matches = userService.match(token.substring(7));
-        if (matches == null) {
-            return badRequest().build();
-        }
-        return ResponseEntity.ok(matches);
+        return userService.match(token.substring(7))
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> badRequest().build());
     }
 
     @GetMapping("/tracks")
-    public List<String> getTopTracks(@RequestHeader("Authorization") String token) throws IOException, URISyntaxException, InterruptedException {
+    public List<String> getTopTracks(@RequestHeader("Authorization") String token){
         return userService.getTopTracks(token.substring(7));
     }
 
     @GetMapping("/matches")
-    public List<User> getMatches(@RequestHeader("Authorization") String token) throws IOException, URISyntaxException, InterruptedException {
+    public List<User> getMatches(@RequestHeader("Authorization") String token){
         return userService.getMatches(token.substring(7));
     }
 
@@ -50,7 +47,7 @@ public class UserController {
 
     @PostMapping("/bio")
     public ResponseEntity<?> setBio(@RequestHeader("Authorization") String token, @RequestBody String bio) {
-        if (userService.setBio(token.substring(7), bio)) {
+        if (userService.setBio(token.substring(7), bio)== AuthorizedActionResult.SUCCESS) {
             return noContent().build();
         }
         return ResponseEntity.badRequest().build();

@@ -20,7 +20,7 @@ public class RandomDataGenerator implements CommandLineRunner {
 
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args){
         insertRandomDataToDatabase(false);
     }
 
@@ -61,8 +61,7 @@ public class RandomDataGenerator implements CommandLineRunner {
     }
 
     public List<String> countries() {
-        List<String> countries = Arrays.asList("EE", "LB", "US", "NG", "PR", "EG", "FN", "PL", "RU", "PZ");
-        return countries;
+        return Arrays.asList("EE", "LB", "US", "NG", "PR", "EG", "FN", "PL", "RU", "PZ");
     }
 
     public List<String> tracks() {

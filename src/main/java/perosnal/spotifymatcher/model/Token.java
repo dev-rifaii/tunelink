@@ -11,7 +11,6 @@ import javax.persistence.*;
 @Builder
 @Getter
 @Setter
-@Table(name = "token")
 public class Token {
     @Id
     @Column(name = "user_id")
