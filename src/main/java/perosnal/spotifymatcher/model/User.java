@@ -22,6 +22,8 @@ public class User {
 
     private String biography;
 
+    private String image;
+
     @ElementCollection
     @CollectionTable(name = "user_top_tracks",
             joinColumns = @JoinColumn(name = "user_id"))
@@ -50,8 +52,4 @@ public class User {
     @JsonIgnore
     private List<String> blocked;
 
-    @JsonIgnore
-    @OneToOne(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL)
-    @PrimaryKeyJoinColumn
-    private Token token;
 }

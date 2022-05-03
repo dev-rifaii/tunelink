@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import perosnal.spotifymatcher.util.HttpRequestSender;
 
+import java.util.List;
+
 @Component
 @AllArgsConstructor
 public class SpotifyAPI {
@@ -25,13 +27,20 @@ public class SpotifyAPI {
     }
 
     @SneakyThrows
-    public String getTopTracks(String token) {
+    public String getTopTracksId(String token) {
         return httpRequestSender.request(BASE_URL + "/me/top/tracks", token);
     }
 
     @SneakyThrows
-    public String getTopArtists(String token) {
+    public String getTopArtistsId(String token) {
         return httpRequestSender.request(BASE_URL + "/me/top/artists", token);
+    }
+
+    @SneakyThrows
+    public String getTracksDetails(List<String> tracksIds, String token) {
+        String queryParam = "?ids=" + String.join(",", tracksIds);
+        System.out.println(queryParam);
+        return httpRequestSender.request(BASE_URL + "/tracks/" + queryParam, token);
     }
 
 }
