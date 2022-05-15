@@ -3,6 +3,7 @@ package perosnal.spotifymatcher.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import perosnal.spotifymatcher.model.SpotifyUser;
 import perosnal.spotifymatcher.model.Track;
 import perosnal.spotifymatcher.model.User;
 import perosnal.spotifymatcher.repository.UserRepository;
@@ -27,7 +28,10 @@ public class UserService {
             return Optional.empty();
         }
         if (matches.size() > 0) {
-            user.getMatches().addAll(matches.stream().map(User::getId).toList());
+            user.getMatches()
+                .addAll(matches.stream()
+                               .map(User::getId)
+                               .toList());
             userRepository.save(user);
             return Optional.of(matches);
         }
@@ -36,12 +40,15 @@ public class UserService {
 
 
     public User getUser(String accessToken) {
-        return spotifyApiService.fetchUserFromSpotifyApi(accessToken);
+        SpotifyUser user = spotifyApiService.fetchUserFromSpotifyApi(accessToken);
+        return userRepository.getById(user.getProfile()
+                                          .getId());
     }
 
     public void blockUser(String accessToken, String id) {
         User user = userRepository.getById(spotifyApiService.getIdByToken(accessToken));
-        user.getBlocked().add(id);
+        user.getBlocked()
+            .add(id);
         userRepository.save(user);
     }
 
@@ -58,22 +65,25 @@ public class UserService {
 
     public List<User> filterMatches(User user, List<User> matches) {
         return matches.stream()
-                .filter(match -> !user.getMatches().contains(match.getId())
-                        && !user.getBlocked().contains(match.getId())
-                        && !match.getBlocked().contains(user.getId())
-                        && match.getBiography() != null)
-                .collect(Collectors.toList());
+                      .filter(match -> !user.getMatches()
+                                            .contains(match.getId())
+                              && !user.getBlocked()
+                                      .contains(match.getId())
+                              && !match.getBlocked()
+                                       .contains(user.getId())
+                              && match.getBiography() != null)
+                      .collect(Collectors.toList());
 
     }
 
     public List<User> getMatches(String accessToken) {
         return userRepository.getById(spotifyApiService.getIdByToken(accessToken))
-                .getMatches()
-                .stream()
-                .map(userRepository::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
+                             .getMatches()
+                             .stream()
+                             .map(userRepository::findById)
+                             .filter(Optional::isPresent)
+                             .map(Optional::get)
+                             .toList();
     }
 
     public List<Track> getTracksDetails(String accessToken) {
@@ -82,7 +92,8 @@ public class UserService {
     }
 
     public List<String> getTopTracks(String accessToken) {
-        return userRepository.getById(spotifyApiService.getIdByToken(accessToken)).getTracks();
+        return userRepository.getById(spotifyApiService.getIdByToken(accessToken))
+                             .getTracks();
     }
 
 

@@ -16,6 +16,7 @@ import static org.springframework.http.ResponseEntity.*;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
+@CrossOrigin("http://localhost:2000/")
 public class UserController {
 
     private final UserService userService;
@@ -51,6 +52,7 @@ public class UserController {
         userService.blockUser(token, id);
         return noContent().build();
     }
+
 
     @PostMapping("/bio")
     public ResponseEntity<?> setBio(@RequestHeader("token") String token, @RequestBody String bio) {

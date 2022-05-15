@@ -2,15 +2,13 @@ package perosnal.spotifymatcher.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import perosnal.spotifymatcher.service.SpotifyApiService;
 
 @RequestMapping("/authentication")
 @RequiredArgsConstructor
 @RestController
+@CrossOrigin("http://localhost:2000/")
 public class AuthenticationController {
 
     private final SpotifyApiService spotifyAuthentication;
@@ -20,6 +18,7 @@ public class AuthenticationController {
         spotifyAuthentication.persistUser(token);
         return ResponseEntity.ok().build();
     }
+
 
 
 }

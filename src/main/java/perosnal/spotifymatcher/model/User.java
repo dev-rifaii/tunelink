@@ -1,7 +1,11 @@
 package perosnal.spotifymatcher.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.List;
@@ -12,6 +16,8 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Table(name = "user")
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
+
 public class User {
     @Id
     private String id;

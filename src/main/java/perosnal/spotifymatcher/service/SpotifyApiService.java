@@ -1,17 +1,18 @@
 package perosnal.spotifymatcher.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import perosnal.spotifymatcher.api.SpotifyAPI;
+import perosnal.spotifymatcher.model.GetSpotifyProfileResponse;
+import perosnal.spotifymatcher.model.SpotifyUser;
 import perosnal.spotifymatcher.model.Track;
 import perosnal.spotifymatcher.model.User;
 import perosnal.spotifymatcher.repository.UserRepository;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -21,58 +22,68 @@ public class SpotifyApiService {
 
     private final UserRepository userRepository;
     private final SpotifyAPI spotifyAPI;
-    private final ObjectMapper objectMapper;
 
-
+    @Transactional
     public void persistUser(String token) {
-        User user = fetchUserFromSpotifyApi(token);
+        SpotifyUser spotifyUser = fetchUserFromSpotifyApi(token);
+        User user = userRepository.findById(spotifyUser.getProfile()
+                        .getId())
+                .map(existingUser -> {
+                    existingUser.setArtists(spotifyUser.getTopArtists());
+                    existingUser.setTracks(spotifyUser.getTopTracks());
+
+                    spotifyUser.getProfile()
+                            .getImages()
+                            .stream()
+                            .findAny()
+                            .map(GetSpotifyProfileResponse.SpotifyUserImage::getUrl)
+                            .ifPresent(existingUser::setImage);
+                    return existingUser;
+                })
+                .orElseGet(() -> User.builder()
+                        .id(spotifyUser.getProfile()
+                                .getId())
+                        .email(spotifyUser.getProfile()
+                                .getEmail())
+                        .tracks(spotifyUser.getTopTracks())
+                        .artists(spotifyUser.getTopArtists())
+                        .country(spotifyUser.getProfile()
+                                .getCountry())
+                        .build());
+
         userRepository.save(user);
     }
 
     @SneakyThrows
-    public User fetchUserFromSpotifyApi(String token) {
-        JsonNode userNode = objectMapper.readTree(spotifyAPI.getProfile(token));
-        JsonNode topTracksNode = objectMapper.readTree(spotifyAPI.getTopTracksId(token)).get("items");
-        JsonNode topArtistsNode = objectMapper.readTree(spotifyAPI.getTopArtistsId(token)).get("items");
-        return User.builder()
-                .id(userNode.get("id").asText())
-                .country(userNode.get("country").asText())
-                .email(userNode.get("email").asText())
-                .image(userNode.get("images").get(0).get("url").asText())
-                .tracks(extractItemsFromJsonNode(topTracksNode))
-                .artists(extractItemsFromJsonNode(topArtistsNode))
-                .build();
+    public String getIdByToken(String token) {
+        return spotifyAPI.getProfile(token)
+                .getId();
     }
 
     @SneakyThrows
-    public String getIdByToken(String token) {
-        JsonNode userNode = objectMapper.readTree(spotifyAPI.getProfile(token));
-        return userNode.get("id").asText();
+    public SpotifyUser fetchUserFromSpotifyApi(String token) {
+        final GetSpotifyProfileResponse profile = spotifyAPI.getProfile(token);
+        final List<String> topTrackIds = spotifyAPI.getTopTracksId(token);
+        final List<String> topArtistsIds = spotifyAPI.getTopArtistsId(token);
 
+        return new SpotifyUser(profile, topTrackIds, topArtistsIds);
     }
 
     @SneakyThrows
     public List<Track> getTracksDetails(List<String> tracksIds, String token) {
-        List<Track> tracks = new ArrayList<>();
-        JsonNode topTracksNode = objectMapper.readTree(spotifyAPI.getTracksDetails(tracksIds, token)).get("tracks");
-        for (JsonNode item : topTracksNode) {
-
-            tracks.add(Track.builder()
-                    .id(item.get("id").asText())
-                    .href(item.get("external_urls").get("spotify").asText())
-                    .name(item.get("name").asText())
-                    .imageUrl(item.get("album").get("images").get(0).get("url").asText())
-                    .build());
-        }
-        return tracks;
-    }
-
-    public List<String> extractItemsFromJsonNode(JsonNode node) {
-        List<String> items = new ArrayList<>();
-        for (JsonNode item : node) {
-            items.add(item.get("id").asText());
-        }
-        return items;
+        return spotifyAPI.getTracksDetails(tracksIds, token).getTracks()
+                .stream()
+                .map(track -> Track.builder()
+                        .name(track.getName())
+                        .href(track.getExternal_urls()
+                                .getSpotify())
+                        .id(track.getId())
+                        .imageUrl(track.getAlbum()
+                                .getImages()
+                                .get(0)
+                                .getUrl())
+                        .build())
+                .collect(Collectors.toList());
     }
 
 
