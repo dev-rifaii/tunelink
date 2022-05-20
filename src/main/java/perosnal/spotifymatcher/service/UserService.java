@@ -41,8 +41,8 @@ public class UserService {
 
     public User getUser(String accessToken) {
         SpotifyUser user = spotifyApiService.fetchUserFromSpotifyApi(accessToken);
-        return userRepository.getById(user.getProfile()
-                                          .getId());
+        return userRepository.getById(user.profile()
+                                          .id());
     }
 
     public void blockUser(String accessToken, String id) {

@@ -1,20 +1,11 @@
 package perosnal.spotifymatcher.model;
 
-import lombok.Getter;
-
 import java.util.List;
 
-@Getter
-public final class GetSpotifyProfileResponse {
+public record GetSpotifyProfileResponse(String id, String country,String email,List<SpotifyUserImage> images ) {
 
-    private String id;
-    private String country;
-    private String email;
-    private List<SpotifyUserImage> images;
 
-    @Getter
-    public static class SpotifyUserImage {
-        private String url;
+    public record SpotifyUserImage(String url) {
     }
 
 }

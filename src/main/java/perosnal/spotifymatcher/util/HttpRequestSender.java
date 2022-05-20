@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import perosnal.spotifymatcher.exception.InvalidTokenException;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -26,6 +27,8 @@ public class HttpRequestSender {
         );
     }
 
+
+
     @SneakyThrows
     public String request(String url, String token) {
         HttpRequest httpRequest = HttpRequest.newBuilder()
@@ -34,6 +37,9 @@ public class HttpRequestSender {
                 .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .build();
         HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+        if(response.statusCode()==400 || response.statusCode()==401){
+            throw new InvalidTokenException();
+        }
         return response.body();
     }
 }

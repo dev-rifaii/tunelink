@@ -34,19 +34,19 @@ public class SpotifyAPI {
     @SneakyThrows
     public List<String> getTopTracksId(String token) {
         return httpRequestSender.request(BASE_URL + "/me/top/tracks", token, GetSpotifyTopItemsResponse.class)
-                                .getItems()
-                                .stream()
-                                .map(GetSpotifyTopItemsResponse.SpotifyItem::getId)
-                                .collect(toList());
+                .items()
+                .stream()
+                .map(GetSpotifyTopItemsResponse.SpotifyItem::id)
+                .collect(toList());
     }
 
     @SneakyThrows
     public List<String> getTopArtistsId(String token) {
         return httpRequestSender.request(BASE_URL + "/me/top/artists", token, GetSpotifyTopItemsResponse.class)
-                                .getItems()
-                                .stream()
-                                .map(GetSpotifyTopItemsResponse.SpotifyItem::getId)
-                                .collect(toList());
+                .items()
+                .stream()
+                .map(GetSpotifyTopItemsResponse.SpotifyItem::id)
+                .collect(toList());
     }
 
     @SneakyThrows

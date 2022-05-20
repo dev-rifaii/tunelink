@@ -26,29 +26,29 @@ public class SpotifyApiService {
     @Transactional
     public void persistUser(String token) {
         SpotifyUser spotifyUser = fetchUserFromSpotifyApi(token);
-        User user = userRepository.findById(spotifyUser.getProfile()
-                        .getId())
+        User user = userRepository.findById(spotifyUser.profile()
+                        .id())
                 .map(existingUser -> {
-                    existingUser.setArtists(spotifyUser.getTopArtists());
-                    existingUser.setTracks(spotifyUser.getTopTracks());
+                    existingUser.setArtists(spotifyUser.topArtists());
+                    existingUser.setTracks(spotifyUser.topTracks());
 
-                    spotifyUser.getProfile()
-                            .getImages()
+                    spotifyUser.profile()
+                            .images()
                             .stream()
                             .findAny()
-                            .map(GetSpotifyProfileResponse.SpotifyUserImage::getUrl)
+                            .map(GetSpotifyProfileResponse.SpotifyUserImage::url)
                             .ifPresent(existingUser::setImage);
                     return existingUser;
                 })
                 .orElseGet(() -> User.builder()
-                        .id(spotifyUser.getProfile()
-                                .getId())
-                        .email(spotifyUser.getProfile()
-                                .getEmail())
-                        .tracks(spotifyUser.getTopTracks())
-                        .artists(spotifyUser.getTopArtists())
-                        .country(spotifyUser.getProfile()
-                                .getCountry())
+                        .id(spotifyUser.profile()
+                                .id())
+                        .email(spotifyUser.profile()
+                                .email())
+                        .tracks(spotifyUser.topTracks())
+                        .artists(spotifyUser.topArtists())
+                        .country(spotifyUser.profile()
+                                .country())
                         .build());
 
         userRepository.save(user);
@@ -57,7 +57,7 @@ public class SpotifyApiService {
     @SneakyThrows
     public String getIdByToken(String token) {
         return spotifyAPI.getProfile(token)
-                .getId();
+                .id();
     }
 
     @SneakyThrows
@@ -71,17 +71,17 @@ public class SpotifyApiService {
 
     @SneakyThrows
     public List<Track> getTracksDetails(List<String> tracksIds, String token) {
-        return spotifyAPI.getTracksDetails(tracksIds, token).getTracks()
+        return spotifyAPI.getTracksDetails(tracksIds, token).tracks()
                 .stream()
                 .map(track -> Track.builder()
-                        .name(track.getName())
-                        .href(track.getExternal_urls()
-                                .getSpotify())
-                        .id(track.getId())
-                        .imageUrl(track.getAlbum()
-                                .getImages()
+                        .name(track.name())
+                        .href(track.external_urls()
+                                .spotify())
+                        .id(track.id())
+                        .imageUrl(track.album()
+                                .images()
                                 .get(0)
-                                .getUrl())
+                                .url())
                         .build())
                 .collect(Collectors.toList());
     }

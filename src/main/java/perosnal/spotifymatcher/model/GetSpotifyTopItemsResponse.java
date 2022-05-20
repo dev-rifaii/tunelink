@@ -1,18 +1,11 @@
 package perosnal.spotifymatcher.model;
 
-import lombok.Getter;
-
 import java.util.List;
 
-@Getter
-public final class GetSpotifyTopItemsResponse {
+public record GetSpotifyTopItemsResponse (List<SpotifyItem> items){
 
-    private List<SpotifyItem> items;
 
-    @Getter
-    public final static class SpotifyItem {
-        private String id;
-
+    public record SpotifyItem (String id) {
 
     }
 

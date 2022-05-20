@@ -4,12 +4,10 @@ package perosnal.spotifymatcher.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import perosnal.spotifymatcher.model.Track;
-import perosnal.spotifymatcher.model.User;
 import perosnal.spotifymatcher.service.UserService;
 import perosnal.spotifymatcher.util.AuthorizedActionResult;
 
-import java.util.List;
+import java.util.Collections;
 
 import static org.springframework.http.ResponseEntity.*;
 
@@ -30,21 +28,22 @@ public class UserController {
     public ResponseEntity<?> match(@RequestHeader("token") String token) {
         return userService.match(token)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> badRequest().build());
+                .orElseGet(() ->ok(Collections.emptyList()));
     }
 
     @GetMapping("/tracksIds")
-    public List<String> getTopTracksIds(@RequestHeader("token") String token) {
-        return userService.getTopTracks(token);
+    public ResponseEntity<?> getTopTracksIds(@RequestHeader("token") String token) {
+        return ok(userService.getTopTracks(token));
     }
 
     @GetMapping("/tracks")
-    public List<Track> getTopTracksDetailed(@RequestHeader("token") String token) {
-        return userService.getTracksDetails(token);
+    public ResponseEntity<?> getTopTracksDetailed(@RequestHeader("token") String token) {
+        return ok(userService.getTracksDetails(token));
     }
+
     @GetMapping("/matches")
-    public List<User> getMatches(@RequestHeader("token") String token) {
-        return userService.getMatches(token);
+    public ResponseEntity<?> getMatches(@RequestHeader("token") String token) {
+        return ok(userService.getMatches(token));
     }
 
     @PostMapping("/block")
@@ -56,6 +55,7 @@ public class UserController {
 
     @PostMapping("/bio")
     public ResponseEntity<?> setBio(@RequestHeader("token") String token, @RequestBody String bio) {
+        System.out.println("this is bio " + bio);
         if (userService.setBio(token, bio) == AuthorizedActionResult.SUCCESS) {
             return noContent().build();
         }

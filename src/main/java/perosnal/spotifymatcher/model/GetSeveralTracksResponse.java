@@ -1,36 +1,21 @@
 package perosnal.spotifymatcher.model;
 
-import lombok.Getter;
-
 import java.util.List;
 
-@Getter
-public class GetSeveralTracksResponse {
+public record GetSeveralTracksResponse(List<Track> tracks) {
 
-    private List<Track> tracks;
 
-    @Getter
-    public static class Track {
-        private SpotifyTrackAlbum album;
-        private String id;
-        private String name;
-        private SpotifyTrackUrl external_urls;
+    public record Track(SpotifyTrackAlbum album, String id, String name, SpotifyTrackUrl external_urls) {
 
-        @Getter
-        public static class SpotifyTrackUrl {
-            private String spotify;
+
+        public record SpotifyTrackUrl(String spotify) {
         }
 
-        @Getter
-        public static class SpotifyTrackAlbum {
-            private List<SpotifyAlbumImage> images;
-
+        public record SpotifyTrackAlbum(List<SpotifyAlbumImage> images) {
         }
 
-        @Getter
-        public static class SpotifyAlbumImage {
-            private String url;
-
+        public record SpotifyAlbumImage(String url) {
         }
+
     }
 }
