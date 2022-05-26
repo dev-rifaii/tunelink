@@ -47,7 +47,8 @@ public class SpotifyAuthorization {
                 .queryParam("response_type", "code")
                 .queryParam("redirect_uri", baseRoute + REDIRECT)
                 .queryParam("scope", "user-read-private user-read-email user-follow-read user-top-read");
-
+        System.out.println(baseRoute);
+        System.out.println(uriComponents.toUriString());
         return uriComponents.toUriString();
     }
 
@@ -94,7 +95,7 @@ public class SpotifyAuthorization {
 
         String parametersString = parameters.entrySet()
                 .stream()
-                .map(e -> e.getKey() + "=" +e.getValue())
+                .map(e -> e.getKey() + "=" + e.getValue())
                 .collect(Collectors.joining("&"));
 
 
