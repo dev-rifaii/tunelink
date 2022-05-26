@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table
+@Table(name = "application_users")
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class User {
     @Id
