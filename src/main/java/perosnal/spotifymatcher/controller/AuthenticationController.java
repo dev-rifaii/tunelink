@@ -13,7 +13,7 @@ import static org.springframework.http.ResponseEntity.ok;
 @RequestMapping("/authentication")
 @RequiredArgsConstructor
 @RestController
-@CrossOrigin("http://localhost:2000/")
+@CrossOrigin
 public class AuthenticationController {
 
     private final SpotifyApiService spotifyApiService;
