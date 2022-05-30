@@ -14,7 +14,7 @@ import static org.springframework.http.ResponseEntity.*;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-@CrossOrigin("https://dev-rifaii.github.io/")
+@CrossOrigin
 public class UserController {
 
     private final UserService userService;

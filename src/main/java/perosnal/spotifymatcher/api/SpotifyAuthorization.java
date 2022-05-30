@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 @Component
 @NoArgsConstructor
 @AllArgsConstructor
+@Slf4j
 public class SpotifyAuthorization {
     @Value("${client.id}")
     private String CLIENT_ID;
@@ -47,8 +49,6 @@ public class SpotifyAuthorization {
                 .queryParam("response_type", "code")
                 .queryParam("redirect_uri", baseRoute + REDIRECT)
                 .queryParam("scope", "user-read-private user-read-email user-follow-read user-top-read");
-        System.out.println(baseRoute);
-        System.out.println(uriComponents.toUriString());
         return uriComponents.toUriString();
     }
 
@@ -78,6 +78,7 @@ public class SpotifyAuthorization {
 
         HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 400) {
+            log.info(response.body());
             return "Error";
         }
         GetToken token = objectMapper.readValue(response.body(), GetToken.class);
