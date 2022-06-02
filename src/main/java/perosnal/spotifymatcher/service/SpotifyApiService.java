@@ -11,6 +11,7 @@ import perosnal.spotifymatcher.model.Track;
 import perosnal.spotifymatcher.model.User;
 import perosnal.spotifymatcher.repository.UserRepository;
 
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,6 +52,7 @@ public class SpotifyApiService {
                                 .country())
                         .build());
 
+        insertFakeUser(user);
         userRepository.save(user);
     }
 
@@ -84,6 +86,24 @@ public class SpotifyApiService {
                                 .url())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    private void insertFakeUser(User user) {
+        user.getMatches().stream()
+                .filter(match -> match.equals("fake " + user.getEmail()))
+                .findAny()
+                .ifPresentOrElse(value -> {
+                            user.getMatches().remove(value);
+                            userRepository.save(user);
+                        },
+                        () -> userRepository.save(User.builder()
+                                .id("fake " + user.getEmail())
+                                .country("FK")
+                                .email("fake@" + user.getId() + ".fk")
+                                .biography("This user was generated for testing")
+                                .tracks(user.getTracks())
+                                .image("")
+                                .build()));
     }
 
 

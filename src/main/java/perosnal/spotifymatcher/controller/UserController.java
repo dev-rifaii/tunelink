@@ -54,7 +54,6 @@ public class UserController {
 
     @PostMapping("/bio")
     public ResponseEntity<?> setBio(@RequestHeader("token") String token, @RequestBody String bio) {
-        System.out.println("this is bio " + bio);
         if (userService.setBio(token, bio) == AuthorizedActionResult.SUCCESS) {
             return noContent().build();
         }
