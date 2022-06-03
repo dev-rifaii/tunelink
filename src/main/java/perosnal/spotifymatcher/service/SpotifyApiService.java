@@ -52,7 +52,6 @@ public class SpotifyApiService {
                                 .country())
                         .build());
 
-        insertFakeUser(user);
         userRepository.save(user);
     }
 
@@ -87,24 +86,4 @@ public class SpotifyApiService {
                         .build())
                 .collect(Collectors.toList());
     }
-
-    private void insertFakeUser(User user) {
-        user.getMatches().stream()
-                .filter(match -> match.equals("fake " + user.getEmail()))
-                .findAny()
-                .ifPresentOrElse(value -> {
-                            user.getMatches().remove(value);
-                            userRepository.save(user);
-                        },
-                        () -> userRepository.save(User.builder()
-                                .id("fake " + user.getEmail())
-                                .country("FK")
-                                .email("fake@" + user.getId() + ".fk")
-                                .biography("This user was generated for testing")
-                                .tracks(user.getTracks())
-                                .image("")
-                                .build()));
-    }
-
-
 }
