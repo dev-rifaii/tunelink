@@ -55,7 +55,7 @@ public class UserService {
 
     public AuthorizedActionResult setBio(String accessToken, String bio) {
         User user = userRepository.getById(spotifyApiService.getIdByToken(accessToken));
-        if (bio.length() > 20) {
+        if (bio!=null && bio.length() > 20) {
             user.setBiography(bio);
             userRepository.save(user);
             return AuthorizedActionResult.SUCCESS;
@@ -71,7 +71,7 @@ public class UserService {
                                       .contains(match.getId())
                               && !match.getBlocked()
                                        .contains(user.getId())
-                              && match.getBiography() != null)
+                              && match.getBiography() != "")
                       .collect(Collectors.toList());
 
     }
