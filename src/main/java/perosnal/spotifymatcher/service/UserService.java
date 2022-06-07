@@ -21,6 +21,8 @@ public class UserService {
 
     private final SpotifyApiService spotifyApiService;
 
+    private final FakeUserService fakeUserService;
+
     public Optional<List<User>> match(String accessToken) {
         User user = userRepository.getById(spotifyApiService.getIdByToken(accessToken));
         List<User> matches = filterMatches(user, userRepository.getMatches(user.getId(), 3));
@@ -29,26 +31,26 @@ public class UserService {
         }
         if (matches.size() > 0) {
             user.getMatches()
-                .addAll(matches.stream()
-                               .map(User::getId)
-                               .toList());
+                    .addAll(matches.stream()
+                            .map(User::getId)
+                            .toList());
             userRepository.save(user);
             return Optional.of(matches);
         }
-        return Optional.empty();
+        return Optional.of(fakeUserService.generateUsers(user, 3));
     }
 
 
     public User getUser(String accessToken) {
         SpotifyUser user = spotifyApiService.fetchUserFromSpotifyApi(accessToken);
         return userRepository.getById(user.profile()
-                                          .id());
+                .id());
     }
 
     public void blockUser(String accessToken, String id) {
         User user = userRepository.getById(spotifyApiService.getIdByToken(accessToken));
         user.getBlocked()
-            .add(id);
+                .add(id);
         userRepository.save(user);
     }
 
@@ -73,17 +75,16 @@ public class UserService {
                                        .contains(user.getId())
                               && match.getBiography() != "")
                       .collect(Collectors.toList());
-
     }
 
     public List<User> getMatches(String accessToken) {
         return userRepository.getById(spotifyApiService.getIdByToken(accessToken))
-                             .getMatches()
-                             .stream()
-                             .map(userRepository::findById)
-                             .filter(Optional::isPresent)
-                             .map(Optional::get)
-                             .toList();
+                .getMatches()
+                .stream()
+                .map(userRepository::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
     }
 
     public List<Track> getTracksDetails(String accessToken) {
@@ -93,7 +94,7 @@ public class UserService {
 
     public List<String> getTopTracks(String accessToken) {
         return userRepository.getById(spotifyApiService.getIdByToken(accessToken))
-                             .getTracks();
+                .getTracks();
     }
 
 
