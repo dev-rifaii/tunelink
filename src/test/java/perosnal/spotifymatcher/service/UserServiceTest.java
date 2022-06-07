@@ -1,10 +1,11 @@
 package perosnal.spotifymatcher.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import perosnal.spotifymatcher.model.User;
 import perosnal.spotifymatcher.repository.UserRepository;
@@ -13,82 +14,64 @@ import perosnal.spotifymatcher.util.AuthorizedActionResult;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.lenient;
+import static java.util.Collections.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-    @Mock
-    private UserRepository userRepository;
-    @Mock
-    private SpotifyApiService spotifyApiService;
-    @InjectMocks
-    private UserService userService;
+    private final UserRepository userRepository = Mockito.mock(UserRepository.class);
+    private final SpotifyApiService spotifyApiService = Mockito.mock(SpotifyApiService.class);
 
-    @BeforeEach
-     void before() {
-        lenient().when(spotifyApiService.getIdByToken("")).thenReturn("");
-        lenient().when(userRepository.getById("")).thenReturn(new User());
+    private final FakeUserService fakeUserService = Mockito.mock(FakeUserService.class);
+    private final UserService userService = new UserService(userRepository, spotifyApiService, fakeUserService);
+
+
+    @ParameterizedTest(name = "given bio{0} setBio should return {1}")
+    @MethodSource("givenBioToExpectedSetBioResult")
+    void setBio_should_return_expectedResult(final String bio, final AuthorizedActionResult expectedResult) {
+        when(spotifyApiService.getIdByToken("")).thenReturn("");
+        when(userRepository.getById("")).thenReturn(new User());
+
+        final AuthorizedActionResult actualResult = userService.setBio("", bio);
+
+        assertEquals(actualResult, expectedResult);
     }
 
-    @Test
-    void given_short_bio_should_return_failure() {
-        AuthorizedActionResult result = userService.setBio("", "123");
-        assertEquals(result, AuthorizedActionResult.FAILURE);
-    }
-
-    @Test
-    void given_null_bio_should_return_failure() {
-        AuthorizedActionResult result = userService.setBio("", null);
-        assertEquals(result, AuthorizedActionResult.FAILURE);
-    }
-
-    //Biography should be 20 characters or above
-    @Test
-    void given_valid_bio_should_return_success() {
-        AuthorizedActionResult result = userService.setBio("", "123456789Test123456789");
-        assertEquals(result, AuthorizedActionResult.SUCCESS);
+    static Stream<Arguments> givenBioToExpectedSetBioResult() {
+        return Stream.of(
+                arguments("", AuthorizedActionResult.FAILURE),
+                arguments("too short", AuthorizedActionResult.FAILURE),
+                arguments(null, AuthorizedActionResult.FAILURE),
+                arguments("123456789Test123456789", AuthorizedActionResult.SUCCESS)
+        );
     }
 
 
+    @ParameterizedTest(name = "given existing match {0} and blocked user {1}, if user is blocked by match={2} and match in filter is {3} result should be empty? {4}")
+    @MethodSource("givenMatchesToExpectedFilterMatchesResult")
+    void filterMatches_should_return_expectedResult(
+            final User givenExistingMatch,
+            final User givenBlockedUser,
+            final boolean givenUserBlockedByMatch,
+            final User matchInFilter,
+            final boolean expectedEmpty
+    ) {
 
-    @Test
-    void given_already_found_match_should_filter(){
-        User user = validUser();
-        user.getMatches().add(validMatch().getId());
-        List<User> matches = userService.filterMatches(user, new ArrayList<>(Arrays.asList(validMatch())));
-        assertTrue(matches.isEmpty());
-    }
-    @Test
-    void given_match_with_empty_bio_should_filter() {
-        List<User> matches = userService.filterMatches(validUser(), new ArrayList<>(Arrays.asList(userWithEmptyBio())));
-        assertTrue(matches.isEmpty());
-    }
+        final User user = validUser();
+        user.setMatches(givenExistingMatch == null ? emptyList() : singletonList(givenExistingMatch.getId()));
+        user.setBlocked(givenBlockedUser == null ? emptyList() : singletonList(givenBlockedUser.getId()));
+        if (givenUserBlockedByMatch) matchInFilter.setBlocked(singletonList(user.getId()));
 
-    @Test
-    void given_valid_match_should_not_filter(){
-        List<User> matches = userService.filterMatches(validUser(), new ArrayList<>(Arrays.asList(validMatch())));
-        assertFalse(matches.isEmpty());
-    }
+        List<User> filteredMatches = userService.filterMatches(user, singletonList(matchInFilter));
 
-    @Test
-    void given_blocked_valid_match_should_filter(){
-        User user = validUser();
-        user.getBlocked().add(validMatch().getId());
-        List<User> matches = userService.filterMatches(user, new ArrayList<>(Arrays.asList(validMatch())));
-        assertTrue(matches.isEmpty());
+        assertEquals(expectedEmpty, filteredMatches.isEmpty());
     }
-
-    @Test
-    void given_match_that_blocked_main_user_should_filter(){
-        User match = validMatch();
-        match.getBlocked().add(validUser().getId());
-        List<User> matches = userService.filterMatches(validUser(), new ArrayList<>(Arrays.asList(match)));
-        assertTrue(matches.isEmpty());
-    }
-
 
     User validUser() {
         return User.builder()
@@ -103,7 +86,7 @@ class UserServiceTest {
                 .build();
     }
 
-    User validMatch() {
+    static User validMatch() {
         return User.builder()
                 .id("validMatch")
                 .biography("ValidBioWith20CharactersForTesting")
@@ -116,10 +99,9 @@ class UserServiceTest {
                 .build();
     }
 
-    User userWithEmptyBio() {
+    static User userWithEmptyBio() {
         return User.builder()
                 .id("emptyBioUser")
-                .biography("")
                 .email("emptyBio@testing.te")
                 .image("imageUrl")
                 .matches(new ArrayList<>())
@@ -127,5 +109,42 @@ class UserServiceTest {
                 .tracks(new ArrayList<>(Arrays.asList("Track1", "Track2", "Track3", "Track4", "Track5")))
                 .country("EE")
                 .build();
+    }
+
+
+    static Stream<Arguments> givenMatchesToExpectedFilterMatchesResult() {
+        return Stream.of(
+                arguments(validMatch(), null, false, validMatch(), true),
+                arguments(null, null, false, userWithEmptyBio(), true),
+                arguments(null, null, false, validMatch(), false),
+                arguments(null, validMatch(), false, validMatch(), true),
+                arguments(validMatch(), null, true, validMatch(), true),
+                arguments(null, null, true, validMatch(), true)
+
+        );
+    }
+
+    @Test
+    void given_populated_list_of_matches_return_its_optional() {
+        when(spotifyApiService.getIdByToken("")).thenReturn(validUser().getId());
+        when(userRepository.getById(validUser().getId())).thenReturn(validUser());
+        when(userRepository.getMatches(validUser().getId(), 3)).thenReturn(singletonList(validMatch()));
+        assertEquals(Optional.of(singletonList(validMatch())), userService.match(""));
+    }
+
+    @Test
+    void given_user_with_empty_bio_match_should_return_empty() {
+        when(spotifyApiService.getIdByToken("")).thenReturn(userWithEmptyBio().getId());
+        when(userRepository.getById(userWithEmptyBio().getId())).thenReturn(userWithEmptyBio());
+        when(userRepository.getMatches(userWithEmptyBio().getId(), 3)).thenReturn(singletonList(validMatch()));
+        assertEquals(Optional.empty(), userService.match(""));
+    }
+
+    @Test
+    void given_user_with_no_matches_return_optional_of_fake_generated_users() {
+        when(spotifyApiService.getIdByToken("")).thenReturn(validUser().getId());
+        when(userRepository.getById(validUser().getId())).thenReturn(validUser());
+        when(userRepository.getMatches(validUser().getId(), 3)).thenReturn(emptyList());
+        assertEquals(Optional.of(fakeUserService.generateUsers(validUser(), 3)), userService.match(""));
     }
 }
