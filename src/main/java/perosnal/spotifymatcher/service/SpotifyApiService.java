@@ -11,6 +11,7 @@ import perosnal.spotifymatcher.model.Track;
 import perosnal.spotifymatcher.model.User;
 import perosnal.spotifymatcher.repository.UserRepository;
 
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -85,6 +86,4 @@ public class SpotifyApiService {
                         .build())
                 .collect(Collectors.toList());
     }
-
-
 }
