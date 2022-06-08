@@ -27,7 +27,7 @@ public class UserController {
     public ResponseEntity<?> match(@RequestHeader("token") String token) {
         return userService.match(token)
                 .map(ResponseEntity::ok)
-                .orElseGet(() ->ok(Collections.emptyList()));
+                .orElseGet(() -> status(401).body(Collections.emptyList()));
     }
 
     @GetMapping("/tracksIds")
