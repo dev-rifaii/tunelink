@@ -35,6 +35,8 @@ public class SpotifyAuthorization {
 
     private static final String BASE_URL = "https://accounts.spotify.com";
 
+    public static final String SCOPE = "user-read-private user-read-email user-top-read";
+
     private final HttpClient httpClient = HttpClient.newHttpClient();
     @Autowired
     private ObjectMapper objectMapper;
@@ -48,7 +50,7 @@ public class SpotifyAuthorization {
                 .queryParam("client_id", CLIENT_ID)
                 .queryParam("response_type", "code")
                 .queryParam("redirect_uri", baseRoute + REDIRECT)
-                .queryParam("scope", "user-read-private user-read-email user-follow-read user-top-read");
+                .queryParam("scope", SCOPE);
         return uriComponents.toUriString();
     }
 
