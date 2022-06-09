@@ -11,6 +11,8 @@ import java.util.stream.IntStream;
 @Service
 public class FakeUserService {
 
+    final Random random = new Random();
+
     public List<User> generateUsers(User user, int amount) {
         return IntStream.range(0, amount)
                 .mapToObj(it -> generateUser(user))
@@ -18,12 +20,11 @@ public class FakeUserService {
     }
 
     public User generateUser(User user) {
-        final Random random = new Random(user.getEmail().hashCode());
         return User.builder()
                 .id(user.getId() + random.nextInt())
                 .country(user.getCountry())
                 .tracks(user.getTracks().stream().limit(3).collect(Collectors.toList()))
-                .email("fake@generated.fk")
+                .email("fake" + random.nextInt() + "@generated.fk")
                 .image("https://i.pravatar.cc/300?u=" + random.nextInt())
                 .biography("This user was generated for testing purposes")
                 .build();
