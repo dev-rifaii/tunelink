@@ -19,42 +19,36 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/profile")
-    public ResponseEntity<?> getProfile(@RequestHeader("token") String token) {
-        return ok(userService.getUser(token));
+    public ResponseEntity<?> getProfile(@RequestHeader("jwt") String jwt) {
+        return ok(userService.getUser(jwt));
     }
 
     @GetMapping("/match")
-    public ResponseEntity<?> match(@RequestHeader("token") String token) {
-        return userService.match(token)
+    public ResponseEntity<?> match(@RequestHeader("jwt") String jwt) {
+        return userService.match(jwt)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> status(401).body(Collections.emptyList()));
     }
 
-    @GetMapping("/tracksIds")
-    public ResponseEntity<?> getTopTracksIds(@RequestHeader("token") String token) {
-        return ok(userService.getTopTracks(token));
-    }
-
     @GetMapping("/tracks")
-    public ResponseEntity<?> getTopTracksDetailed(@RequestHeader("token") String token) {
-        return ok(userService.getTracksDetails(token));
+    public ResponseEntity<?> getTopTracksDetailed(@RequestHeader("jwt") String jwt) {
+        return ok(userService.getTracksDetails(jwt));
     }
 
     @GetMapping("/matches")
-    public ResponseEntity<?> getMatches(@RequestHeader("token") String token) {
-        return ok(userService.getMatches(token));
+    public ResponseEntity<?> getMatches(@RequestHeader("jwt") String jwt) {
+        return ok(userService.getMatches(jwt));
     }
 
     @PostMapping("/block")
-    public ResponseEntity<?> block(@RequestHeader("token") String token, @RequestBody String id) {
-        userService.blockUser(token, id);
+    public ResponseEntity<?> block(@RequestHeader("jwt") String jwt, @RequestBody String id) {
+        userService.blockUser(jwt, id);
         return noContent().build();
     }
 
-
     @PostMapping("/bio")
-    public ResponseEntity<?> setBio(@RequestHeader("token") String token, @RequestBody String bio) {
-        if (userService.setBio(token, bio) == AuthorizedActionResult.SUCCESS) {
+    public ResponseEntity<?> setBio(@RequestHeader("jwt") String jwt, @RequestBody String bio) {
+        if (userService.setBio(jwt, bio) == AuthorizedActionResult.SUCCESS) {
             return noContent().build();
         }
         return ResponseEntity.badRequest().build();

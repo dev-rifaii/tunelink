@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import perosnal.spotifymatcher.api.SpotifyAuthorization;
+import perosnal.spotifymatcher.security.JwtTokenValidator;
 import perosnal.spotifymatcher.service.SpotifyApiService;
 
 import static org.springframework.http.ResponseEntity.badRequest;
@@ -18,6 +19,8 @@ public class AuthenticationController {
 
     private final SpotifyApiService spotifyApiService;
     private final SpotifyAuthorization spotifyAuthorization;
+
+    private final JwtTokenValidator jwtTokenValidator;
 
     @GetMapping("/url")
     public String getUrl(@RequestHeader String baseRoute) {
@@ -41,10 +44,16 @@ public class AuthenticationController {
         }
         return ok(response);
     }
+
     @PostMapping("/persist")
     public ResponseEntity<?> persist(@RequestHeader("token") String token) {
         spotifyApiService.persistUser(token);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/id")
+    public ResponseEntity<?> getId(@RequestHeader("token") String token) {
+        return ok(spotifyApiService.getIdByToken(token));
     }
 
 

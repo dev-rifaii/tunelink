@@ -3,12 +3,14 @@ package perosnal.spotifymatcher.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import perosnal.spotifymatcher.model.SpotifyUser;
 import perosnal.spotifymatcher.model.Track;
 import perosnal.spotifymatcher.model.User;
+import perosnal.spotifymatcher.repository.TrackRepository;
 import perosnal.spotifymatcher.repository.UserRepository;
+import perosnal.spotifymatcher.security.JwtTokenValidator;
 import perosnal.spotifymatcher.util.AuthorizedActionResult;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,12 +21,14 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    private final SpotifyApiService spotifyApiService;
-
+    private final TrackRepository trackRepository;
     private final FakeUserService fakeUserService;
+    private final JwtTokenValidator jwtTokenValidator;
 
-    public Optional<List<User>> match(String accessToken) {
-        User user = userRepository.getById(spotifyApiService.getIdByToken(accessToken));
+
+    public Optional<List<User>> match(String jwt) {
+        jwtTokenValidator.validateJwt(jwt);
+        User user = userRepository.getById(jwtTokenValidator.getUserSpotifyId(jwt));
         List<User> matches = filterMatches(user, userRepository.getMatches(user.getId(), 3));
         if (user.getBiography() == null) {
             return Optional.empty();
@@ -41,22 +45,23 @@ public class UserService {
     }
 
 
-    public User getUser(String accessToken) {
-        SpotifyUser user = spotifyApiService.fetchUserFromSpotifyApi(accessToken);
-        return userRepository.getById(user.profile()
-                .id());
+    public User getUser(String jwt) {
+        jwtTokenValidator.validateJwt(jwt);
+        return userRepository.getById(jwtTokenValidator.getUserSpotifyId(jwt));
     }
 
-    public void blockUser(String accessToken, String id) {
-        User user = userRepository.getById(spotifyApiService.getIdByToken(accessToken));
+    public void blockUser(String jwt, String id) {
+        jwtTokenValidator.validateJwt(jwt);
+        User user = userRepository.getById(jwtTokenValidator.getUserSpotifyId(jwt));
         user.getBlocked()
                 .add(id);
         userRepository.save(user);
     }
 
 
-    public AuthorizedActionResult setBio(String accessToken, String bio) {
-        User user = userRepository.getById(spotifyApiService.getIdByToken(accessToken));
+    public AuthorizedActionResult setBio(String jwt, String bio) {
+        jwtTokenValidator.validateJwt(jwt);
+        User user = userRepository.getById(jwtTokenValidator.getUserSpotifyId(jwt));
         if (bio != null && bio.length() > 20) {
             user.setBiography(bio);
             userRepository.save(user);
@@ -80,8 +85,9 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public List<User> getMatches(String accessToken) {
-        return userRepository.getById(spotifyApiService.getIdByToken(accessToken))
+    public List<User> getMatches(String jwt) {
+        jwtTokenValidator.validateJwt(jwt);
+        return userRepository.getById(jwtTokenValidator.getUserSpotifyId(jwt))
                 .getMatches()
                 .stream()
                 .map(userRepository::findById)
@@ -90,15 +96,14 @@ public class UserService {
                 .toList();
     }
 
-    public List<Track> getTracksDetails(String accessToken) {
-        User user = userRepository.getById(spotifyApiService.getIdByToken(accessToken));
-        return spotifyApiService.getTracksDetails(user.getTracks(), accessToken);
+    public List<Track> getTracksDetails(String jwt) {
+        jwtTokenValidator.validateJwt(jwt);
+        User user = userRepository.getById(jwtTokenValidator.getUserSpotifyId(jwt));
+        List<Track> tracks = new ArrayList<>();
+        for (String id : user.getTracks()) {
+            tracks.add(trackRepository.getById(id));
+        }
+        return tracks;
     }
-
-    public List<String> getTopTracks(String accessToken) {
-        return userRepository.getById(spotifyApiService.getIdByToken(accessToken))
-                .getTracks();
-    }
-
 
 }

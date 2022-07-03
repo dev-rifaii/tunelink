@@ -5,8 +5,9 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import perosnal.spotifymatcher.model.GetSeveralTracksResponse;
-import perosnal.spotifymatcher.model.GetSpotifyTopItemsResponse;
 import perosnal.spotifymatcher.model.GetSpotifyProfileResponse;
+import perosnal.spotifymatcher.model.GetSpotifyTopItemsResponse;
+import perosnal.spotifymatcher.model.GetSpotifyUserId;
 import perosnal.spotifymatcher.util.HttpRequestSender;
 
 import java.util.List;
@@ -29,6 +30,10 @@ public class SpotifyAPI {
     @SneakyThrows
     public GetSpotifyProfileResponse getProfile(String token) {
         return httpRequestSender.request(BASE_URL + "/me", token, GetSpotifyProfileResponse.class);
+    }
+
+    public GetSpotifyUserId getSpotifyUserId(String token) {
+        return httpRequestSender.request(BASE_URL + "/me", token, GetSpotifyUserId.class);
     }
 
     @SneakyThrows

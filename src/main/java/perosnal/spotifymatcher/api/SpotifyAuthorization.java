@@ -38,6 +38,7 @@ public class SpotifyAuthorization {
     public static final String SCOPE = "user-read-private user-read-email user-top-read";
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
+
     @Autowired
     private ObjectMapper objectMapper;
 

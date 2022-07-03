@@ -9,6 +9,7 @@ import perosnal.spotifymatcher.model.GetSpotifyProfileResponse;
 import perosnal.spotifymatcher.model.SpotifyUser;
 import perosnal.spotifymatcher.model.Track;
 import perosnal.spotifymatcher.model.User;
+import perosnal.spotifymatcher.repository.TrackRepository;
 import perosnal.spotifymatcher.repository.UserRepository;
 
 
@@ -22,7 +23,10 @@ public class SpotifyApiService {
 
 
     private final UserRepository userRepository;
+
+    private final TrackRepository trackRepository;
     private final SpotifyAPI spotifyAPI;
+
 
     @Transactional
     public void persistUser(String token) {
@@ -51,6 +55,12 @@ public class SpotifyApiService {
                         .country(spotifyUser.profile()
                                 .country())
                         .build());
+
+        if (!user.getTracks().isEmpty()) {
+            List<Track> tracks = getTracksDetails(user.getTracks(), token);
+            trackRepository.saveAll(tracks);
+        }
+
 
         userRepository.save(user);
     }

@@ -8,7 +8,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import perosnal.spotifymatcher.model.User;
+import perosnal.spotifymatcher.repository.TrackRepository;
 import perosnal.spotifymatcher.repository.UserRepository;
+import perosnal.spotifymatcher.security.JwtTokenValidator;
 import perosnal.spotifymatcher.util.AuthorizedActionResult;
 
 import java.util.ArrayList;
@@ -17,7 +19,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.when;
@@ -26,16 +29,17 @@ import static org.mockito.Mockito.when;
 class UserServiceTest {
 
     private final UserRepository userRepository = Mockito.mock(UserRepository.class);
-    private final SpotifyApiService spotifyApiService = Mockito.mock(SpotifyApiService.class);
 
+    private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
     private final FakeUserService fakeUserService = Mockito.mock(FakeUserService.class);
-    private final UserService userService = new UserService(userRepository, spotifyApiService, fakeUserService);
+    private final JwtTokenValidator jwtTokenValidator = Mockito.mock(JwtTokenValidator.class);
+    private final UserService userService = new UserService(userRepository, trackRepository, fakeUserService, jwtTokenValidator);
 
 
     @ParameterizedTest(name = "given bio{0} setBio should return {1}")
     @MethodSource("givenBioToExpectedSetBioResult")
     void setBio_should_return_expectedResult(final String bio, final AuthorizedActionResult expectedResult) {
-        when(spotifyApiService.getIdByToken("")).thenReturn("");
+        when(jwtTokenValidator.getUserSpotifyId("")).thenReturn("");
         when(userRepository.getById("")).thenReturn(new User());
 
         final AuthorizedActionResult actualResult = userService.setBio("", bio);
@@ -126,7 +130,7 @@ class UserServiceTest {
 
     @Test
     void given_populated_list_of_matches_return_its_optional() {
-        when(spotifyApiService.getIdByToken("")).thenReturn(validUser().getId());
+        when(jwtTokenValidator.getUserSpotifyId("")).thenReturn(validUser().getId());
         when(userRepository.getById(validUser().getId())).thenReturn(validUser());
         when(userRepository.getMatches(validUser().getId(), 3)).thenReturn(singletonList(validMatch()));
         assertEquals(Optional.of(singletonList(validMatch())), userService.match(""));
@@ -134,7 +138,7 @@ class UserServiceTest {
 
     @Test
     void given_user_with_empty_bio_match_should_return_empty() {
-        when(spotifyApiService.getIdByToken("")).thenReturn(userWithEmptyBio().getId());
+        when(jwtTokenValidator.getUserSpotifyId("")).thenReturn(userWithEmptyBio().getId());
         when(userRepository.getById(userWithEmptyBio().getId())).thenReturn(userWithEmptyBio());
         when(userRepository.getMatches(userWithEmptyBio().getId(), 3)).thenReturn(singletonList(validMatch()));
         assertEquals(Optional.empty(), userService.match(""));
@@ -142,7 +146,7 @@ class UserServiceTest {
 
     @Test
     void given_user_with_no_matches_return_optional_of_fake_generated_users() {
-        when(spotifyApiService.getIdByToken("")).thenReturn(validUser().getId());
+        when(jwtTokenValidator.getUserSpotifyId("")).thenReturn(validUser().getId());
         when(userRepository.getById(validUser().getId())).thenReturn(validUser());
         when(userRepository.getMatches(validUser().getId(), 3)).thenReturn(emptyList());
         assertEquals(Optional.of(fakeUserService.generateUsers(validUser(), 3)), userService.match(""));

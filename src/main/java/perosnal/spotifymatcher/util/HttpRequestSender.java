@@ -22,24 +22,33 @@ public class HttpRequestSender {
     @SneakyThrows
     public <T> T request(String url, String token, Class<T> responseClass) {
         return objectMapper.readValue(
-                request(url, token),
+                requestToSpotifyApi(url, token),
                 responseClass
         );
     }
 
 
-
     @SneakyThrows
-    public String request(String url, String token) {
+    private String requestToSpotifyApi(String url, String token) {
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(new URI(url))
                 .header("Authorization", "Bearer " + token)
                 .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .build();
         HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-        if(response.statusCode()==400 || response.statusCode()==401){
+        if (response.statusCode() == 400 || response.statusCode() == 401) {
             throw new InvalidTokenException();
         }
+        return response.body();
+    }
+
+    @SneakyThrows
+    public String genericRequest(String url) {
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(new URI(url))
+                .build();
+        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
         return response.body();
     }
 }
