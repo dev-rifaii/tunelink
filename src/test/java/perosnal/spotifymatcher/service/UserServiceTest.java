@@ -29,7 +29,6 @@ import static org.mockito.Mockito.when;
 class UserServiceTest {
 
     private final UserRepository userRepository = Mockito.mock(UserRepository.class);
-
     private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
     private final FakeUserService fakeUserService = Mockito.mock(FakeUserService.class);
     private final JwtTokenValidator jwtTokenValidator = Mockito.mock(JwtTokenValidator.class);
@@ -132,8 +131,9 @@ class UserServiceTest {
     void given_populated_list_of_matches_return_its_optional() {
         when(jwtTokenValidator.getUserSpotifyId("")).thenReturn(validUser().getId());
         when(userRepository.getById(validUser().getId())).thenReturn(validUser());
-        when(userRepository.getMatches(validUser().getId(), 3)).thenReturn(singletonList(validMatch()));
-        assertEquals(Optional.of(singletonList(validMatch())), userService.match(""));
+        User match = validMatch();
+        when(userRepository.getMatches(validUser().getId(), 3)).thenReturn(singletonList(match));
+        assertEquals(Optional.of(singletonList(match)), userService.match(""));
     }
 
     @Test
@@ -149,6 +149,7 @@ class UserServiceTest {
         when(jwtTokenValidator.getUserSpotifyId("")).thenReturn(validUser().getId());
         when(userRepository.getById(validUser().getId())).thenReturn(validUser());
         when(userRepository.getMatches(validUser().getId(), 3)).thenReturn(emptyList());
-        assertEquals(Optional.of(fakeUserService.generateUsers(validUser(), 3)), userService.match(""));
+        List<User> fakeMatches = fakeUserService.generateUsers(validUser(), 3);
+        assertEquals(Optional.of(fakeMatches), userService.match(""));
     }
 }

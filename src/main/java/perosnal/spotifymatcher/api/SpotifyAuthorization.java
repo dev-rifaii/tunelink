@@ -1,29 +1,21 @@
 package perosnal.spotifymatcher.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 import perosnal.spotifymatcher.model.GetToken;
+import perosnal.spotifymatcher.util.HttpRequestSender;
 
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
-@NoArgsConstructor
-@AllArgsConstructor
 @Slf4j
 public class SpotifyAuthorization {
     @Value("${client.id}")
@@ -37,10 +29,14 @@ public class SpotifyAuthorization {
 
     public static final String SCOPE = "user-read-private user-read-email user-top-read";
 
-    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final HttpRequestSender httpRequestSender;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
+
+    public SpotifyAuthorization(final HttpRequestSender httpRequestSender, final ObjectMapper objectMapper) {
+        this.httpRequestSender = httpRequestSender;
+        this.objectMapper = objectMapper;
+    }
 
 
     public String authenticationUrl(String baseRoute) {
@@ -58,28 +54,19 @@ public class SpotifyAuthorization {
     @SneakyThrows
     public String callback(String code, String baseRoute) {
 
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("code", code);
-        parameters.put("redirect_uri", baseRoute + REDIRECT);
-        parameters.put("grant_type", "authorization_code");
-
-        String parametersString = parameters.entrySet()
-                .stream()
-                .map(e -> e.getKey() + "=" + e.getValue())
-                .collect(Collectors.joining("&"));
+        String parametersString = "code=" + code
+                + "&redirect_uri=" + baseRoute + REDIRECT
+                + "&grant_type=authorization_code";
 
 
-        String beforeEncoding = CLIENT_ID + ":" + CLIENT_SECRET;
-        String afterEncoding = Base64.getEncoder().encodeToString(beforeEncoding.getBytes(StandardCharsets.UTF_8));
-        String header = "Basic " + afterEncoding;
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(new URI(BASE_URL + "/api/token"))
-                .header("Authorization", header)
+                .header("Authorization", getEncodedSpotifyAppCredentialsHeader())
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .POST(HttpRequest.BodyPublishers.ofString(parametersString))
                 .build();
 
-        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = httpRequestSender.genericRequest(httpRequest);
         if (response.statusCode() == 400) {
             log.info(response.body());
             return "Error";
@@ -93,34 +80,28 @@ public class SpotifyAuthorization {
     @SneakyThrows
     public String refreshToken(String refreshToken) {
 
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("refresh_token", refreshToken);
-        parameters.put("grant_type", "refresh_token");
-
-        String parametersString = parameters.entrySet()
-                .stream()
-                .map(e -> e.getKey() + "=" + e.getValue())
-                .collect(Collectors.joining("&"));
-
-
-        String beforeEncoding = CLIENT_ID + ":" + CLIENT_SECRET;
-        String afterEncoding = Base64.getEncoder().encodeToString(beforeEncoding.getBytes(StandardCharsets.UTF_8));
-        String header = "Basic " + afterEncoding;
+        String parametersString = "refresh_token=" + refreshToken
+                + "&grant_type=refresh_token";
 
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(new URI(BASE_URL + "/api/token"))
-                .header("Authorization", header)
+                .header("Authorization", getEncodedSpotifyAppCredentialsHeader())
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .POST(HttpRequest.BodyPublishers.ofString(parametersString))
                 .build();
 
-        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = httpRequestSender.genericRequest(httpRequest);
         if (response.statusCode() == 400) {
             return "Error";
         }
         GetToken token = objectMapper.readValue(response.body(), GetToken.class);
         token.setExpires_at(System.currentTimeMillis() + 3600 * 1000);
         return objectMapper.writeValueAsString(token);
+    }
+
+    private String getEncodedSpotifyAppCredentialsHeader() {
+        String beforeEncoding = CLIENT_ID + ":" + CLIENT_SECRET;
+        return "Basic " + Base64.getEncoder().encodeToString(beforeEncoding.getBytes(StandardCharsets.UTF_8));
     }
 
 }

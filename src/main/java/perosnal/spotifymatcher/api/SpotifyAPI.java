@@ -2,7 +2,6 @@ package perosnal.spotifymatcher.api;
 
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import perosnal.spotifymatcher.model.GetSeveralTracksResponse;
 import perosnal.spotifymatcher.model.GetSpotifyProfileResponse;
@@ -22,9 +21,6 @@ public class SpotifyAPI {
      * See <a href="https://developer.spotify.com/documentation/web-api/reference/#/">reference documentation</a> for more details.
      */
     public static final String BASE_URL = "https://api.spotify.com/v1";
-
-
-    @Autowired
     private final HttpRequestSender httpRequestSender;
 
     @SneakyThrows

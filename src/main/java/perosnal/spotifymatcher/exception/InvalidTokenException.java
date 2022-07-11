@@ -1,4 +1,4 @@
 package perosnal.spotifymatcher.exception;
 
-public class InvalidTokenException extends Exception{
+public class InvalidTokenException extends Exception {
 }

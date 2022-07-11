@@ -3,10 +3,8 @@ package perosnal.spotifymatcher.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import perosnal.spotifymatcher.util.HttpRequestSender;
@@ -17,12 +15,10 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 @Component
-@AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class JwtTokenValidator {
 
-    @Autowired
-    private HttpRequestSender httpRequestSender;
+    private final HttpRequestSender httpRequestSender;
 
     @Value("${auth.server.url}")
     private String AUTH_SERVER_URL;
@@ -32,23 +28,20 @@ public class JwtTokenValidator {
         Jwts.parserBuilder()
                 .setSigningKey(publicKey())
                 .build()
-                .parseClaimsJws(jwt)
-                .getBody();
+                .parseClaimsJws(jwt);
     }
 
     @SneakyThrows
-    public PublicKey publicKey() {
-        String rsaPublicKey = httpRequestSender.genericRequest(AUTH_SERVER_URL+"/api/key");
-        String publicKey = rsaPublicKey;
+    private PublicKey publicKey() {
+        String rsaPublicKey = httpRequestSender.genericRequest(AUTH_SERVER_URL + "/api/key");
+        String publicKey = rsaPublicKey.replace("\n", "")
+                .replace("-----BEGIN PUBLIC KEY-----", "")
+                .replace("-----END PUBLIC KEY-----", "");
 
-        publicKey = publicKey.replace("\n", "");
-        publicKey = publicKey.replace("-----BEGIN PUBLIC KEY-----", "");
-        publicKey = publicKey.replace("-----END PUBLIC KEY-----", "");
-        byte publicKeyData[] = Base64.getDecoder().decode(publicKey);
+        final byte[] publicKeyData = Base64.getDecoder().decode(publicKey);
         X509EncodedKeySpec spec = new X509EncodedKeySpec(publicKeyData);
         KeyFactory kf = KeyFactory.getInstance("RSA");
-        PublicKey pk = kf.generatePublic(spec);
-        return pk;
+        return kf.generatePublic(spec);
     }
 
     public String getUserSpotifyId(String jwt) {
@@ -56,8 +49,6 @@ public class JwtTokenValidator {
                 .setSigningKey(publicKey())
                 .build()
                 .parseClaimsJws(jwt);
-        System.out.println(claims.getBody().get("user_id"));
-
         return claims.getBody().get("user_id").toString();
     }
 

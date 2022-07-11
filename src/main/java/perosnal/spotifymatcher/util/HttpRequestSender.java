@@ -51,4 +51,9 @@ public class HttpRequestSender {
 
         return response.body();
     }
+
+    @SneakyThrows
+    public HttpResponse<String> genericRequest(HttpRequest httpRequest) {
+        return httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+    }
 }

@@ -18,7 +18,7 @@ public interface UserRepository extends JpaRepository<User, String> {
     List<User> findByCountry(String country);
 
 
-    @Query(value ="SELECT * from application_users where id IN ("+
+    @Query(value = "SELECT * from application_users where id IN (" +
             "SELECT that.user_id " +
             "FROM user_top_tracks AS this INNER JOIN user_top_tracks " +
             "AS that ON that.user_id <> this.user_id " +

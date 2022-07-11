@@ -12,7 +12,6 @@ import perosnal.spotifymatcher.model.User;
 import perosnal.spotifymatcher.repository.TrackRepository;
 import perosnal.spotifymatcher.repository.UserRepository;
 
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,6 +53,12 @@ public class SpotifyApiService {
                         .artists(spotifyUser.topArtists())
                         .country(spotifyUser.profile()
                                 .country())
+                        .image(spotifyUser.profile()
+                                .images()
+                                .stream()
+                                .findAny()
+                                .map(GetSpotifyProfileResponse.SpotifyUserImage::url)
+                                .orElse(""))
                         .build());
 
         if (!user.getTracks().isEmpty()) {

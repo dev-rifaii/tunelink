@@ -10,7 +10,6 @@ import perosnal.spotifymatcher.repository.UserRepository;
 import perosnal.spotifymatcher.security.JwtTokenValidator;
 import perosnal.spotifymatcher.util.AuthorizedActionResult;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,7 +19,6 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
-
     private final TrackRepository trackRepository;
     private final FakeUserService fakeUserService;
     private final JwtTokenValidator jwtTokenValidator;
@@ -34,11 +32,7 @@ public class UserService {
             return Optional.empty();
         }
         if (matches.size() > 0) {
-            user.getMatches()
-                    .addAll(matches.stream()
-                            .map(User::getId)
-                            .toList());
-            userRepository.save(user);
+            persistMatches(user, matches);
             return Optional.of(matches);
         }
         return Optional.of(fakeUserService.generateUsers(user, 3));
@@ -98,12 +92,23 @@ public class UserService {
 
     public List<Track> getTracksDetails(String jwt) {
         jwtTokenValidator.validateJwt(jwt);
-        User user = userRepository.getById(jwtTokenValidator.getUserSpotifyId(jwt));
-        List<Track> tracks = new ArrayList<>();
-        for (String id : user.getTracks()) {
-            tracks.add(trackRepository.getById(id));
-        }
-        return tracks;
+        return userRepository.getById(jwtTokenValidator.getUserSpotifyId(jwt))
+                .getTracks()
+                .stream()
+                .map(trackRepository::getById)
+                .collect(Collectors.toList());
+    }
+
+    private void persistMatches(User user, List<User> newMatches) {
+        user.getMatches()
+                .addAll(newMatches.stream()
+                        .map(User::getId)
+                        .toList());
+        newMatches.forEach(match -> {
+            match.getMatches().add(user.getId());
+            userRepository.save(match);
+        });
+        userRepository.save(user);
     }
 
 }
