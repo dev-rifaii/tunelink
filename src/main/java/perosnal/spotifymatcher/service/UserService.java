@@ -111,4 +111,13 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public void forceMatch(String firstId, String secondId) {
+        User firstUser = userRepository.getById(firstId);
+        User secondUser = userRepository.getById(secondId);
+        firstUser.getMatches().add(secondId);
+        secondUser.getMatches().add(firstId);
+        userRepository.save(firstUser);
+        userRepository.save(secondUser);
+    }
+
 }

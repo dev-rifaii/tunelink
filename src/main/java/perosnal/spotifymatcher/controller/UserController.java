@@ -2,8 +2,10 @@ package perosnal.spotifymatcher.controller;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import perosnal.spotifymatcher.model.PostForcedMatch;
 import perosnal.spotifymatcher.service.UserService;
 import perosnal.spotifymatcher.util.AuthorizedActionResult;
 
@@ -17,6 +19,9 @@ import static org.springframework.http.ResponseEntity.*;
 public class UserController {
 
     private final UserService userService;
+
+    @Value("${admin.password}")
+    private String ADMIN_PASSWORD;
 
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(@RequestHeader("jwt") String jwt) {
@@ -52,5 +57,14 @@ public class UserController {
             return noContent().build();
         }
         return ResponseEntity.badRequest().build();
+    }
+
+    @PostMapping("/force")
+    public ResponseEntity<?> forceMatch(@RequestBody PostForcedMatch postForcedMatch) {
+        if (postForcedMatch.adminPassword().equals(ADMIN_PASSWORD)) {
+            userService.forceMatch(postForcedMatch.firstId(), postForcedMatch.secondId());
+            return ok("Success");
+        }
+        return badRequest().build();
     }
 }
