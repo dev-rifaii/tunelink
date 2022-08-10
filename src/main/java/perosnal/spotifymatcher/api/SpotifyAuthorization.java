@@ -27,7 +27,7 @@ public class SpotifyAuthorization {
 
     private static final String BASE_URL = "https://accounts.spotify.com";
 
-    public static final String SCOPE = "user-read-private user-read-email user-top-read";
+    public static final String SCOPE = "user-read-email user-top-read";
 
     private final HttpRequestSender httpRequestSender;
 
