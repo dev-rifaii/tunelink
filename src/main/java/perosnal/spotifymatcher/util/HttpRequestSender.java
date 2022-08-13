@@ -39,6 +39,7 @@ public class HttpRequestSender {
         if (response.statusCode() == 400 || response.statusCode() == 401) {
             throw new InvalidTokenException();
         }
+        System.out.println(response.body());
         return response.body();
     }
 

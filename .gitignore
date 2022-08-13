@@ -5,6 +5,9 @@ target/
 !**/src/test/**/target/
 TestToken.java
 src/main/resources/application-local.properties
+Dockerfile
+.dockerignore
+docker-compose.yml
 
 ### IntelliJ IDEA ###
 .idea
