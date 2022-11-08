@@ -3,7 +3,7 @@ package perosnal.spotifymatcher.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import perosnal.spotifymatcher.api.SpotifyAuthorization;
+import perosnal.spotifymatcher.client.SpotifyAuthorization;
 import perosnal.spotifymatcher.service.SpotifyApiService;
 
 import static org.springframework.http.ResponseEntity.badRequest;
@@ -22,6 +22,12 @@ public class AuthenticationController {
     @GetMapping("/url")
     public String getUrl(@RequestHeader String baseRoute) {
         return spotifyAuthorization.authenticationUrl(baseRoute);
+    }
+
+    @GetMapping("/callback")
+    public String callback(@RequestParam String code){
+        System.out.println(code);
+        return code;
     }
 
     @GetMapping("/token")

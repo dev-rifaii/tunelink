@@ -1,4 +1,4 @@
-package perosnal.spotifymatcher.api;
+package perosnal.spotifymatcher.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;

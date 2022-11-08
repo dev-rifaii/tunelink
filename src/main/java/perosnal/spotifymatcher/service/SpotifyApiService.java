@@ -4,13 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import perosnal.spotifymatcher.api.SpotifyAPI;
 import perosnal.spotifymatcher.model.GetSpotifyProfileResponse;
 import perosnal.spotifymatcher.model.SpotifyUser;
 import perosnal.spotifymatcher.model.Track;
 import perosnal.spotifymatcher.model.User;
 import perosnal.spotifymatcher.repository.TrackRepository;
 import perosnal.spotifymatcher.repository.UserRepository;
+import perosnal.spotifymatcher.client.SpotifyApiClient;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,9 +22,8 @@ public class SpotifyApiService {
 
 
     private final UserRepository userRepository;
-
     private final TrackRepository trackRepository;
-    private final SpotifyAPI spotifyAPI;
+    private final SpotifyApiClient spotifyApiClient;
 
 
     @Transactional
@@ -72,22 +71,23 @@ public class SpotifyApiService {
 
     @SneakyThrows
     public String getIdByToken(String token) {
-        return spotifyAPI.getProfile(token)
+        return spotifyApiClient.getProfile(token)
                 .id();
     }
 
     @SneakyThrows
     public SpotifyUser fetchUserFromSpotifyApi(String token) {
-        final GetSpotifyProfileResponse profile = spotifyAPI.getProfile(token);
-        final List<String> topTrackIds = spotifyAPI.getTopTracksId(token);
-        final List<String> topArtistsIds = spotifyAPI.getTopArtistsId(token);
+        final GetSpotifyProfileResponse profile = spotifyApiClient.getProfile("Bearer " + token);
+        final List<String> topTrackIds = spotifyApiClient.getTopTracksId(token);
+        final List<String> topArtistsIds = spotifyApiClient.getTopArtistsId(token);
 
         return new SpotifyUser(profile, topTrackIds, topArtistsIds);
     }
 
     @SneakyThrows
     public List<Track> getTracksDetails(List<String> tracksIds, String token) {
-        return spotifyAPI.getTracksDetails(tracksIds, token).tracks()
+        String ids = String.join(",", tracksIds);
+        return spotifyApiClient.getTracksDetails(ids, token).tracks()
                 .stream()
                 .map(track -> Track.builder()
                         .name(track.name())
