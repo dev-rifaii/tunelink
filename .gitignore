@@ -5,6 +5,9 @@ target/
 !**/src/test/**/target/
 TestToken.java
 src/main/resources/application-local.properties
+src/main/resources/application-local.yml
+.gradle
+target
 
 ### IntelliJ IDEA ###
 .idea

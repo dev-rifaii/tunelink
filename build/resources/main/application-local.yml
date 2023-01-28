@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/spotify_matcher
+    username: root
+    password: root
+
+  jpa:
+    properties:
+      driver-class-name: org.postgresql.Driver
+      database-platform: org.hibernate.dialect.PostgreSQLDialect
+      show-sql: true
+      hibernate:
+      ddl-auto: create
+
+client:
+  id: 537744f06d43427ea4113474b592f490
+  secret: cb3cab83041c48cc9a6820e5032e5f25
+
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /spotifymatcher
+
+auth:
+  server:
+    url: http://localhost:8090
+
+admin:
+  password: yes
