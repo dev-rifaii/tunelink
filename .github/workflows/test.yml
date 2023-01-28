@@ -17,5 +17,5 @@ jobs:
           java-version: 17
           distribution: zulu
           cache: maven
-      - name: Run tests with Maven
-        run: mvn -B test --file pom.xml
+      - name: Run tests with Gradle
+        run: gradle clean test
