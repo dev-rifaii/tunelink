@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
-import perosnal.tunelink.user.TokenDto;
 import perosnal.tunelink.spotify.dto.TokenRequestDto;
 import perosnal.tunelink.util.HttpRequestSender;
 
@@ -66,7 +65,7 @@ public class SpotifyAuthorizationService {
             log.info(response.body());
             return "Error";
         }
-        TokenDto token = objectMapper.readValue(response.body(), TokenDto.class);
+        SpotifyToken token = objectMapper.readValue(response.body(), SpotifyToken.class);
         token.setExpires_at(System.currentTimeMillis() + 3600 * 1000);
 
         return objectMapper.writeValueAsString(token);
@@ -89,7 +88,7 @@ public class SpotifyAuthorizationService {
         if (response.statusCode() == 400) {
             return "Error";
         }
-        TokenDto token = objectMapper.readValue(response.body(), TokenDto.class);
+        SpotifyToken token = objectMapper.readValue(response.body(), SpotifyToken.class);
         token.setExpires_at(System.currentTimeMillis() + 3600 * 1000);
         return objectMapper.writeValueAsString(token);
     }

@@ -2,7 +2,6 @@ package perosnal.tunelink.spotify;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
-import perosnal.tunelink.user.TokenDto;
 import perosnal.tunelink.spotify.dto.TokenRequestDto;
 
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -11,6 +10,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 public interface SpotifyAuthorizationClient {
 
     @RequestMapping(method = POST, value = "/api/token", produces = "application/x-www-form-urlencoded")
-    TokenDto getToken(TokenRequestDto tokenRequestDto);
+    SpotifyToken getToken(TokenRequestDto tokenRequestDto);
 
 }
