@@ -1,7 +1,7 @@
 package personal.tunelink;
 
-import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -18,10 +18,10 @@ import perosnal.tunelink.spotify.SpotifyAuthorizationClient;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
 public abstract class IntegrationTestBase {
 
-    @Mock
+    @MockBean
     protected SpotifyAuthorizationClient spotifyAuthorizationClient;
 
-    @Mock
+    @MockBean
     protected SpotifyApiClient spotifyApiClient;
 
     private static final PostgreSQLContainer postgresTestContainer = new PostgreSQLContainer("postgres:15")
