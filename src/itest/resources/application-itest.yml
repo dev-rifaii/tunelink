@@ -1,0 +1,25 @@
+spring:
+  jpa:
+    properties:
+      driver-class-name: org.postgresql.Driver
+      database-platform: org.hibernate.dialect.PostgreSQLDialect
+      show-sql: true
+      hibernate:
+        hbm2ddl:
+          auto: create
+
+  liquibase:
+    enabled: false
+
+rsa:
+  private:
+    key: itest
+  public:
+    key: itest
+
+admin:
+  password: yes
+
+logging:
+  level:
+    web: debug

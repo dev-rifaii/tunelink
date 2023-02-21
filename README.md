@@ -1,4 +1,6 @@
-# music-matcher
+# tunelink
 
-This app uses the Spotify API which limits usage to users added to the application dashboard on the Spotify website. If you would like to test the app please send me your Spotify email and access the website here:
-https://dev-rifaii.github.io/music-matcher-frontend/
+### Running locally:
+1. docker compose -f docker/db.yml up -d
+2. add application.properties file with required variables
+3. ./gradlew bootRun

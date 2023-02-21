@@ -12,25 +12,25 @@ repositories {
     mavenCentral()
 }
 
-jar {
-    manifest {
-        attributes "Main-Class": "personal.tunelink.Application"
-    }
-
-    duplicatesStrategy "exclude"
-
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-}
+//jar {
+//    manifest {
+//        attributes "Main-Class": "personal.tunelink.Application"
+//    }
+//
+//    duplicatesStrategy "exclude"
+//
+//    from {
+//        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+//    }
+//}
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 //    implementation 'org.springframework.boot:spring-boot-starter-jwt:3.0.0'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.0.1'
-    implementation 'org.springframework.boot:spring-boot-starter-validation:3.0.0'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.0.2'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
 
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
@@ -38,7 +38,7 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
     implementation 'org.postgresql:postgresql:42.5.1'
-    implementation 'org.liquibase:liquibase-core'
+//    implementation 'org.liquibase:liquibase-core'
 
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
@@ -52,8 +52,8 @@ dependencies {
 }
 
 sourceSets {
-    testcommons{
-        java{
+    testcommons {
+        java {
             srcDir 'src/testcommons/java'
             compileClasspath += sourceSets.main.output
             runtimeClasspath += sourceSets.main.output

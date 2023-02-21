@@ -48,7 +48,7 @@ public class User {
     @JsonIgnore
     private List<String> matches;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "blocked_users",
             joinColumns = @JoinColumn(name = "blocker_id"))
     @Column(name = "blocked_id")
