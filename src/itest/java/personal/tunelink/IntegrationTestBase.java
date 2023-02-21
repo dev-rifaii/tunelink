@@ -1,7 +1,6 @@
 package personal.tunelink;
 
 import org.mockito.Mock;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -10,13 +9,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.PostgreSQLContainer;
+import perosnal.tunelink.Application;
 import perosnal.tunelink.spotify.SpotifyApiClient;
 import perosnal.tunelink.spotify.SpotifyAuthorizationClient;
 
 @ActiveProfiles("itest")
 @ContextConfiguration(initializers = IntegrationTestBase.ContextInitializer.class)
-@EnableAutoConfiguration
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
 public abstract class IntegrationTestBase {
 
     @Mock

@@ -27,7 +27,7 @@ public class UserService {
 
     public List<User> match(String jwt) {
         jwtManager.validateJwt(jwt);
-        User user = userRepository.findById(jwtManager.getUserSpotifyId(jwt)).get();
+        User user = userRepository.getById(jwtManager.getUserSpotifyId(jwt));
         isTrue(user.getBiography() != null, "Biography needs to be set before matching");
         List<User> matches = filterMatches(user, userRepository.getMatches(user.getId(), 3));
         if (matches.size() > 0) {
@@ -40,12 +40,12 @@ public class UserService {
 
     public User getUser(String jwt) {
         jwtManager.validateJwt(jwt);
-        return userRepository.findById(jwtManager.getUserSpotifyId(jwt)).get();
+        return userRepository.getById(jwtManager.getUserSpotifyId(jwt));
     }
 
     public void blockUser(String jwt, String id) {
         jwtManager.validateJwt(jwt);
-        User user = userRepository.findById(jwtManager.getUserSpotifyId(jwt)).get();
+        User user = userRepository.getById(jwtManager.getUserSpotifyId(jwt));
         user.getBlocked().add(id);
         userRepository.save(user);
     }
@@ -53,7 +53,7 @@ public class UserService {
 
     public AuthorizedActionResult setBio(String jwt, String bio) {
         jwtManager.validateJwt(jwt);
-        User user = userRepository.findById(jwt).get();
+        User user = userRepository.getById(jwt);
         if (bio != null && bio.length() > 20) {
             user.setBiography(bio);
             userRepository.save(user);
