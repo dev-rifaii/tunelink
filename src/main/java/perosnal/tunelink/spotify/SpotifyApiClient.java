@@ -23,7 +23,7 @@ public interface SpotifyApiClient {
     @RequestMapping(method = GET, value = "/me/top/tracks")
     List<String> getTopTracksId(@RequestHeader(name = "Authorization") String token);
 
-    @RequestMapping(method = GET, value = "/me/top/tracks")
+    @RequestMapping(method = GET, value = "/me/top/artists")
     List<String> getTopArtistsId(@RequestHeader(name = "Authorization") String token);
 
     @RequestMapping(method = GET, value = "/tracks/")

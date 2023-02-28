@@ -7,6 +7,9 @@ import lombok.*;
 
 import java.util.List;
 
+import static jakarta.persistence.FetchType.EAGER;
+import static jakarta.persistence.FetchType.LAZY;
+
 @Entity(name = "`user`")
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,14 +30,14 @@ public class User {
 
     private String imageUrl;
 
-    @ElementCollection
+    @ElementCollection(fetch = LAZY)
     @CollectionTable(name = "user_top_tracks",
             joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "track_id")
     @JsonIgnore
     private List<String> tracks;
 
-    @ElementCollection
+    @ElementCollection(fetch = LAZY)
     @CollectionTable(name = "user_top_artists",
             joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "artist_id")
@@ -48,7 +51,7 @@ public class User {
     @JsonIgnore
     private List<String> matches;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = EAGER)
     @CollectionTable(name = "blocked_users",
             joinColumns = @JoinColumn(name = "blocker_id"))
     @Column(name = "blocked_id")

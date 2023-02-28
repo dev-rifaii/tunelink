@@ -11,10 +11,6 @@ spring:
   liquibase:
     enabled: false
 
-client:
-  id: itest
-  secret: itest
-
 rsa:
   private:
     key: itest

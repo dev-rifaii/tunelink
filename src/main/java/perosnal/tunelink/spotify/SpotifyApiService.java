@@ -3,12 +3,11 @@ package perosnal.tunelink.spotify;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import perosnal.tunelink.track.Track;
 import perosnal.tunelink.spotify.dto.SpotifyProfileDto;
 import perosnal.tunelink.spotify.dto.SpotifyUserDto;
+import perosnal.tunelink.track.Track;
 import perosnal.tunelink.user.User;
-import perosnal.tunelink.track.TrackRepository;
-import perosnal.tunelink.user.UserRepository;
+import perosnal.tunelink.user.UserService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,8 +18,7 @@ import java.util.stream.Collectors;
 public class SpotifyApiService {
 
 
-    private final UserRepository userRepository;
-    private final TrackRepository trackRepository;
+    private final UserService userService;
     private final SpotifyApiClient spotifyApiClient;
 
 
@@ -40,13 +38,7 @@ public class SpotifyApiService {
                         .map(SpotifyProfileDto.SpotifyUserImage::url)
                         .orElse(null))
                 .build();
-
-        if (!user.getTracks().isEmpty()) {
-            List<Track> tracks = getTracksDetails(user.getTracks(), token);
-            trackRepository.saveAll(tracks);
-        }
-
-        userRepository.save(user);
+        userService.persistSpotifyUser(user, getTracksDetails(user.getTracks(), token));
     }
 
     public String getIdByToken(String token) {

@@ -3,10 +3,10 @@ package perosnal.tunelink.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import perosnal.tunelink.faker.FakeUserService;
+import perosnal.tunelink.jwt.JwtManager;
 import perosnal.tunelink.track.Track;
 import perosnal.tunelink.track.TrackRepository;
-import perosnal.tunelink.jwt.JwtManager;
-import perosnal.tunelink.faker.FakeUserService;
 import perosnal.tunelink.util.AuthorizedActionResult;
 
 import java.util.List;
@@ -37,6 +37,13 @@ public class UserService {
         return fakeUserService.generateUsers(user, 3);
     }
 
+    public void persistSpotifyUser(User user, List<Track> tracks) {
+        if (!user.getTracks().isEmpty()) {
+            trackRepository.saveAll(tracks);
+        }
+        userRepository.save(user);
+    }
+
 
     public User getUser(String jwt) {
         jwtManager.validateJwt(jwt);
@@ -62,7 +69,7 @@ public class UserService {
         return AuthorizedActionResult.FAILURE;
     }
 
-    public List<User> filterMatches(User user, List<User> matches) {
+    private List<User> filterMatches(User user, List<User> matches) {
         return matches.stream()
                 .filter(match -> !user.getMatches()
                         .contains(match.getId())

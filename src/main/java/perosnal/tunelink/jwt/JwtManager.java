@@ -51,6 +51,14 @@ public class JwtManager {
                 .compact();
     }
 
+    public String getUserSpotifyId(String jwt) {
+        Jws<Claims> claims = Jwts.parserBuilder()
+                .setSigningKey(publicKey())
+                .build()
+                .parseClaimsJws(jwt);
+        return claims.getBody().get("user_id").toString();
+    }
+
     @SneakyThrows
     private PublicKey publicKey() {
         publicKey = publicKey.replace("\n", "")
@@ -72,14 +80,4 @@ public class JwtManager {
         KeyFactory kf = KeyFactory.getInstance("RSA");
         return kf.generatePrivate(keySpec);
     }
-
-
-    public String getUserSpotifyId(String jwt) {
-        Jws<Claims> claims = Jwts.parserBuilder()
-                .setSigningKey(publicKey())
-                .build()
-                .parseClaimsJws(jwt);
-        return claims.getBody().get("user_id").toString();
-    }
-
 }

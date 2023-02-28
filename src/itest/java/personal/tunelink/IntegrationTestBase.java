@@ -12,6 +12,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import perosnal.tunelink.Application;
 import perosnal.tunelink.spotify.SpotifyApiClient;
 import perosnal.tunelink.spotify.SpotifyAuthorizationClient;
+import perosnal.tunelink.spotify.SpotifyAuthorizationService;
 
 @ActiveProfiles("itest")
 @ContextConfiguration(initializers = IntegrationTestBase.ContextInitializer.class)
@@ -20,9 +21,10 @@ public abstract class IntegrationTestBase {
 
     @MockBean
     protected SpotifyAuthorizationClient spotifyAuthorizationClient;
-
     @MockBean
     protected SpotifyApiClient spotifyApiClient;
+    @MockBean
+    protected SpotifyAuthorizationService spotifyAuthorizationService;
 
     private static final PostgreSQLContainer postgresTestContainer = new PostgreSQLContainer("postgres:15")
             .withUsername("itest")
@@ -42,8 +44,6 @@ public abstract class IntegrationTestBase {
             final String url = postgresTestContainer.getJdbcUrl();
             final String username = postgresTestContainer.getUsername();
             final String password = postgresTestContainer.getPassword();
-            System.out.println("#!#!#!#!");
-            System.out.println(url);
             TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
                     configurableApplicationContext,
                     "spring.datasource.url=" + url,
