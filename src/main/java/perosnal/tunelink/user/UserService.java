@@ -27,7 +27,7 @@ public class UserService {
 
     public List<User> match(String jwt) {
         jwtManager.validateJwt(jwt);
-        User user = userRepository.getById(jwtManager.getUserSpotifyId(jwt));
+        User user = userRepository.getById(jwtManager.extractSub(jwt));
         isTrue(user.getBiography() != null, "Biography needs to be set before matching");
         List<User> matches = filterMatches(user, userRepository.getMatches(user.getId(), 3));
         if (matches.size() > 0) {
@@ -47,12 +47,12 @@ public class UserService {
 
     public User getUser(String jwt) {
         jwtManager.validateJwt(jwt);
-        return userRepository.getById(jwtManager.getUserSpotifyId(jwt));
+        return userRepository.getById(jwtManager.extractSub(jwt));
     }
 
     public void blockUser(String jwt, String id) {
         jwtManager.validateJwt(jwt);
-        User user = userRepository.getById(jwtManager.getUserSpotifyId(jwt));
+        User user = userRepository.getById(jwtManager.extractSub(jwt));
         user.getBlocked().add(id);
         userRepository.save(user);
     }
@@ -69,7 +69,8 @@ public class UserService {
         return AuthorizedActionResult.FAILURE;
     }
 
-    private List<User> filterMatches(User user, List<User> matches) {
+    //TODO filter matches on database level
+    protected List<User> filterMatches(User user, List<User> matches) {
         return matches.stream()
                 .filter(match -> !user.getMatches()
                         .contains(match.getId())
@@ -77,15 +78,15 @@ public class UserService {
                         .contains(match.getId())
                         && !match.getBlocked()
                         .contains(user.getId())
-                        && match.getBiography() != ""
                         && match.getBiography() != null
+                        && !match.getBiography().isBlank()
                 )
                 .collect(Collectors.toList());
     }
 
     public List<User> getMatches(String jwt) {
         jwtManager.validateJwt(jwt);
-        return userRepository.getById(jwtManager.getUserSpotifyId(jwt))
+        return userRepository.getById(jwtManager.extractSub(jwt))
                 .getMatches()
                 .stream()
                 .map(userRepository::findById)
@@ -96,7 +97,7 @@ public class UserService {
 
     public List<Track> getTracksDetails(String jwt) {
         jwtManager.validateJwt(jwt);
-        return userRepository.getById(jwtManager.getUserSpotifyId(jwt))
+        return userRepository.getById(jwtManager.extractSub(jwt))
                 .getTracks()
                 .stream()
                 .map(trackRepository::getById)

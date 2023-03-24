@@ -23,6 +23,7 @@ import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,7 +39,7 @@ class UserServiceTest {
     @ParameterizedTest(name = "given bio{0} setBio should return {1}")
     @MethodSource("givenBioToExpectedSetBioResult")
     void setBio_should_return_expectedResult(final String bio, final AuthorizedActionResult expectedResult) {
-        when(jwtManager.getUserSpotifyId("")).thenReturn("");
+        when(jwtManager.extractSub("")).thenReturn("");
         when(userRepository.getById("")).thenReturn(new User());
 
         final AuthorizedActionResult actualResult = userService.setBio("", bio);
@@ -129,7 +130,7 @@ class UserServiceTest {
 
     @Test
     void given_populated_list_of_matches_return_its_optional() {
-        when(jwtManager.getUserSpotifyId("")).thenReturn(validUser().getId());
+        when(jwtManager.extractSub(anyString())).thenReturn(validUser().getId());
         when(userRepository.getById(validUser().getId())).thenReturn(validUser());
         User match = validMatch();
         when(userRepository.getMatches(validUser().getId(), 3)).thenReturn(singletonList(match));
@@ -138,7 +139,7 @@ class UserServiceTest {
 
     @Test
     void given_user_with_empty_bio_match_should_return_empty() {
-        when(jwtManager.getUserSpotifyId("")).thenReturn(userWithEmptyBio().getId());
+        when(jwtManager.extractSub(anyString())).thenReturn(userWithEmptyBio().getId());
         when(userRepository.getById(userWithEmptyBio().getId())).thenReturn(userWithEmptyBio());
         when(userRepository.getMatches(userWithEmptyBio().getId(), 3)).thenReturn(singletonList(validMatch()));
         assertThrows(TuneLinkException.class, () -> userService.match(""));
@@ -146,7 +147,7 @@ class UserServiceTest {
 
     @Test
     void given_user_with_no_matches_return_optional_of_fake_generated_users() {
-        when(jwtManager.getUserSpotifyId("")).thenReturn(validUser().getId());
+        when(jwtManager.extractSub(anyString())).thenReturn(validUser().getId());
         when(userRepository.getById(validUser().getId())).thenReturn(validUser());
         when(userRepository.getMatches(validUser().getId(), 3)).thenReturn(emptyList());
         List<User> fakeMatches = fakeUserService.generateUsers(validUser(), 3);
