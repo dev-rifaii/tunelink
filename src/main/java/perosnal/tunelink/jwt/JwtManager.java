@@ -5,8 +5,11 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import perosnal.tunelink.exception.InvalidJwtException;
+import perosnal.tunelink.exception.TuneLinkException;
 
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -18,10 +21,8 @@ import java.security.spec.X509EncodedKeySpec;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Base64;
-import java.util.Map;
 
-import static java.util.Map.entry;
-
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtManager {
@@ -34,29 +35,33 @@ public class JwtManager {
 
 
     public void validateJwt(String jwt) {
-        Jwts.parserBuilder()
-                .setSigningKey(publicKey())
-                .build()
-                .parseClaimsJws(jwt);
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(publicKey())
+                    .build()
+                    .parseClaimsJws(jwt);
+        } catch (Exception e) {
+            throw new InvalidJwtException();
+        }
     }
 
     @SneakyThrows
     public String generateToken(String userId) {
+        if (userId == null || userId.isEmpty() || userId.isBlank())
+            throw new TuneLinkException("User ID can't be empty");
         return Jwts.builder()
+                .setSubject(userId)
                 .setExpiration(Date.valueOf(LocalDate.now().plusDays(1)))
-                .setClaims(Map.ofEntries(
-                        entry("user_id", userId))
-                )
                 .signWith(getPrivateKey())
                 .compact();
     }
 
-    public String getUserSpotifyId(String jwt) {
+    public String extractSub(String jwt) {
         Jws<Claims> claims = Jwts.parserBuilder()
                 .setSigningKey(publicKey())
                 .build()
                 .parseClaimsJws(jwt);
-        return claims.getBody().get("user_id").toString();
+        return claims.getBody().get("sub").toString();
     }
 
     @SneakyThrows

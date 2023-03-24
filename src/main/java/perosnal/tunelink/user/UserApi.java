@@ -12,7 +12,7 @@ import java.util.List;
 import static org.springframework.http.ResponseEntity.*;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("api/v1/users")
 @RequiredArgsConstructor
 public class UserApi {
 
@@ -22,34 +22,34 @@ public class UserApi {
     private String ADMIN_PASSWORD;
 
     @GetMapping("/profile")
-    public ResponseEntity<?> getProfile(@RequestHeader("jwt") String jwt) {
-        return ok(userService.getUser(jwt));
+    public ResponseEntity<?> getProfile(@RequestHeader String userId) {
+        return ok(userService.getUser(userId));
     }
 
     @GetMapping("/match")
-    public List<User> match(@RequestHeader("jwt") String jwt) {
-        return userService.match(jwt);
+    public List<User> match(@RequestHeader String userId) {
+        return userService.match(userId);
     }
 
     @GetMapping("/tracks")
-    public ResponseEntity<?> getTopTracksDetailed(@RequestHeader("jwt") String jwt) {
-        return ok(userService.getTracksDetails(jwt));
+    public ResponseEntity<?> getTopTracksDetailed(@RequestHeader String userId) {
+        return ok(userService.getTracksDetails(userId));
     }
 
     @GetMapping("/matches")
-    public ResponseEntity<?> getMatches(@RequestHeader("jwt") String jwt) {
-        return ok(userService.getMatches(jwt));
+    public ResponseEntity<?> getMatches(@RequestHeader String userId) {
+        return ok(userService.getMatches(userId));
     }
 
     @PostMapping("/block")
-    public ResponseEntity<?> block(@RequestHeader("jwt") String jwt, @RequestBody String id) {
-        userService.blockUser(jwt, id);
+    public ResponseEntity<?> block(@RequestHeader String userId, @RequestBody String id) {
+        userService.blockUser(userId, id);
         return noContent().build();
     }
 
     @PostMapping("/bio")
-    public ResponseEntity<?> setBio(@RequestHeader("jwt") String jwt, @RequestBody String bio) {
-        if (userService.setBio(jwt, bio) == AuthorizedActionResult.SUCCESS) {
+    public ResponseEntity<?> setBio(@RequestHeader String userId, @RequestBody String bio) {
+        if (userService.setBio(userId, bio) == AuthorizedActionResult.SUCCESS) {
             return noContent().build();
         }
         return ResponseEntity.badRequest().build();

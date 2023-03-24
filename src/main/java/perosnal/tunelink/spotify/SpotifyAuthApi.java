@@ -10,7 +10,7 @@ import static org.springframework.http.ResponseEntity.badRequest;
 import static org.springframework.http.ResponseEntity.ok;
 
 
-@RequestMapping("api/v1/auth")
+@RequestMapping("api/v1/spotify-auth")
 @RequiredArgsConstructor
 @RestController
 public class SpotifyAuthApi {
