@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import perosnal.tunelink.faker.FakeUserService;
-import perosnal.tunelink.jwt.JwtManager;
 import perosnal.tunelink.track.Track;
 import perosnal.tunelink.track.TrackRepository;
 import perosnal.tunelink.util.AuthorizedActionResult;
@@ -24,12 +23,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final TrackRepository trackRepository;
     private final FakeUserService fakeUserService;
-    private final JwtManager jwtManager;
 
-
-    public List<User> match(String jwt) {
-        jwtManager.validateJwt(jwt);
-        User user = userRepository.getById(jwtManager.extractSub(jwt));
+    public List<User> match(String userId) {
+        User user = userRepository.getById(userId);
         isTrue(user.getBiography() != null, "Biography needs to be set before matching");
         List<User> matches = filterMatches(user, userRepository.getMatches(user.getId(), 3));
         if (matches.size() > 0) {
@@ -47,22 +43,19 @@ public class UserService {
     }
 
 
-    public User getUser(String jwt) {
-        jwtManager.validateJwt(jwt);
-        return userRepository.getById(jwtManager.extractSub(jwt));
+    public User getUser(String userId) {
+        return userRepository.getById(userId);
     }
 
-    public void blockUser(String jwt, String id) {
-        jwtManager.validateJwt(jwt);
-        User user = userRepository.getById(jwtManager.extractSub(jwt));
+    public void blockUser(String userId, String id) {
+        User user = userRepository.getById(userId);
         user.getBlocked().add(id);
         userRepository.save(user);
     }
 
 
-    public AuthorizedActionResult setBio(String jwt, String bio) {
-        jwtManager.validateJwt(jwt);
-        User user = userRepository.getById(jwt);
+    public AuthorizedActionResult setBio(String userId, String bio) {
+        User user = userRepository.getById(userId);
         if (bio != null && bio.length() > 20) {
             user.setBiography(bio);
             userRepository.save(user);
@@ -86,9 +79,8 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public List<User> getMatches(String jwt) {
-        jwtManager.validateJwt(jwt);
-        return userRepository.getById(jwtManager.extractSub(jwt))
+    public List<User> getMatches(String userId) {
+        return userRepository.getById(userId)
                 .getMatches()
                 .stream()
                 .map(userRepository::findById)
@@ -97,9 +89,8 @@ public class UserService {
                 .toList();
     }
 
-    public List<Track> getTracksDetails(String jwt) {
-        jwtManager.validateJwt(jwt);
-        return userRepository.getById(jwtManager.extractSub(jwt))
+    public List<Track> getTracksDetails(String userId) {
+        return userRepository.getById(userId)
                 .getTracks()
                 .stream()
                 .map(trackRepository::getById)

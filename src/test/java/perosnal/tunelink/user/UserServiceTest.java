@@ -9,7 +9,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import perosnal.tunelink.exception.TuneLinkException;
 import perosnal.tunelink.faker.FakeUserService;
-import perosnal.tunelink.jwt.JwtManager;
 import perosnal.tunelink.track.TrackRepository;
 import perosnal.tunelink.util.AuthorizedActionResult;
 
@@ -23,7 +22,6 @@ import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,14 +30,13 @@ class UserServiceTest {
     private final UserRepository userRepository = Mockito.mock(UserRepository.class);
     private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
     private final FakeUserService fakeUserService = Mockito.mock(FakeUserService.class);
-    private final JwtManager jwtManager = Mockito.mock(JwtManager.class);
-    private final UserService userService = new UserService(userRepository, trackRepository, fakeUserService, jwtManager);
+    private final UserService userService = new UserService(userRepository, trackRepository, fakeUserService);
 
+    private final String VALID_USER_ID = validUser().getId();
 
     @ParameterizedTest(name = "given bio{0} setBio should return {1}")
     @MethodSource("givenBioToExpectedSetBioResult")
     void setBio_should_return_expectedResult(final String bio, final AuthorizedActionResult expectedResult) {
-        when(jwtManager.extractSub("")).thenReturn("");
         when(userRepository.getById("")).thenReturn(new User());
 
         final AuthorizedActionResult actualResult = userService.setBio("", bio);
@@ -130,27 +127,25 @@ class UserServiceTest {
 
     @Test
     void given_populated_list_of_matches_return_its_optional() {
-        when(jwtManager.extractSub(anyString())).thenReturn(validUser().getId());
-        when(userRepository.getById(validUser().getId())).thenReturn(validUser());
+        when(userRepository.getById(VALID_USER_ID)).thenReturn(validUser());
         User match = validMatch();
-        when(userRepository.getMatches(validUser().getId(), 3)).thenReturn(singletonList(match));
-        assertEquals(singletonList(match), userService.match(""));
+        when(userRepository.getMatches(VALID_USER_ID, 3)).thenReturn(singletonList(match));
+        assertEquals(singletonList(match), userService.match(VALID_USER_ID));
     }
 
     @Test
     void given_user_with_empty_bio_match_should_return_empty() {
-        when(jwtManager.extractSub(anyString())).thenReturn(userWithEmptyBio().getId());
-        when(userRepository.getById(userWithEmptyBio().getId())).thenReturn(userWithEmptyBio());
-        when(userRepository.getMatches(userWithEmptyBio().getId(), 3)).thenReturn(singletonList(validMatch()));
-        assertThrows(TuneLinkException.class, () -> userService.match(""));
+        var userId = userWithEmptyBio().getId();
+        when(userRepository.getById(userId)).thenReturn(userWithEmptyBio());
+        when(userRepository.getMatches(userId, 3)).thenReturn(singletonList(validMatch()));
+        assertThrows(TuneLinkException.class, () -> userService.match(userId));
     }
 
     @Test
     void given_user_with_no_matches_return_optional_of_fake_generated_users() {
-        when(jwtManager.extractSub(anyString())).thenReturn(validUser().getId());
-        when(userRepository.getById(validUser().getId())).thenReturn(validUser());
-        when(userRepository.getMatches(validUser().getId(), 3)).thenReturn(emptyList());
+        when(userRepository.getById(VALID_USER_ID)).thenReturn(validUser());
+        when(userRepository.getMatches(VALID_USER_ID, 3)).thenReturn(emptyList());
         List<User> fakeMatches = fakeUserService.generateUsers(validUser(), 3);
-        assertEquals(fakeMatches, userService.match(""));
+        assertEquals(fakeMatches, userService.match(VALID_USER_ID));
     }
 }
