@@ -8,4 +8,7 @@ public class Helpers {
         return ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
     }
 
+    public static String appendBearer(String token) {
+        return "Bearer " + token;
+    }
 }

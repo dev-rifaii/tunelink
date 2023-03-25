@@ -32,7 +32,6 @@ public class SpotifyAuthorizationService {
 
     private final HttpRequestSender httpRequestSender;
     private final ObjectMapper objectMapper;
-    private final SpotifyAuthorizationClient authorizationClient;
     private final SpotifyApiService spotifyApiService;
 
     public String authenticationUrl(String baseRoute) {

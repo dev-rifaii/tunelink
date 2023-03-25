@@ -5,12 +5,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.*;
+import lombok.experimental.Accessors;
 
-@Builder
 @Entity
 @Getter
+@Setter
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Accessors(chain = true)
+@NoArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 @Table(name = "track_metadata")
 public class Track {

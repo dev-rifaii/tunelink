@@ -4,13 +4,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import perosnal.tunelink.spotify.dto.SpotifyProfileDto;
+import perosnal.tunelink.spotify.dto.SpotifyTopArtistsDto;
+import perosnal.tunelink.spotify.dto.SpotifyTopTracksDto;
 import perosnal.tunelink.spotify.dto.SpotifyUserDto;
 import perosnal.tunelink.track.Track;
 import perosnal.tunelink.user.User;
 import perosnal.tunelink.user.UserService;
+import perosnal.tunelink.util.Mappers;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static perosnal.tunelink.util.Helpers.appendBearer;
 
 
 @Service
@@ -23,13 +29,13 @@ public class SpotifyApiService {
 
 
     @Transactional
-    public void persistUser(String token) {
-        SpotifyUserDto spotifyUserDto = fetchUserFromSpotifyApi(token);
-        User user = User.builder()
+    public void persistUser(String token) throws IOException {
+        final var spotifyUserDto = fetchUserFromSpotifyApi(token);
+        final User user = User.builder()
                 .id(spotifyUserDto.profile().id())
                 .email(spotifyUserDto.profile().email())
-                .tracks(spotifyUserDto.topTracks())
-                .artists(spotifyUserDto.topArtists())
+                .tracks(collectTracksIds(spotifyUserDto.topTracks()))
+                .artists(collectArtistsIds(spotifyUserDto.topArtists()))
                 .country(spotifyUserDto.profile().country())
                 .imageUrl(spotifyUserDto.profile()
                         .images()
@@ -38,7 +44,8 @@ public class SpotifyApiService {
                         .map(SpotifyProfileDto.SpotifyUserImage::url)
                         .orElse(null))
                 .build();
-        userService.persistSpotifyUser(user, getTracksDetails(user.getTracks(), token));
+
+        userService.persistSpotifyUser(user, collectTracksDetails(spotifyUserDto.topTracks()));
     }
 
     public String getIdByToken(String token) {
@@ -47,26 +54,22 @@ public class SpotifyApiService {
 
     private SpotifyUserDto fetchUserFromSpotifyApi(String token) {
         final SpotifyProfileDto profile = spotifyApiClient.getProfile(appendBearer(token));
-        final List<String> topTrackIds = spotifyApiClient.getTopTracksId(appendBearer(token));
-        final List<String> topArtistsIds = spotifyApiClient.getTopArtistsId(appendBearer(token));
+        final SpotifyTopTracksDto topTracks = spotifyApiClient.getTopTracks(appendBearer(token));
+        final SpotifyTopArtistsDto topArtists = spotifyApiClient.getTopArtistsId(appendBearer(token));
 
-        return new SpotifyUserDto(profile, topTrackIds, topArtistsIds);
+        return new SpotifyUserDto(profile, topTracks, topArtists);
     }
 
-    private List<Track> getTracksDetails(List<String> tracksIds, String token) {
-        String ids = String.join(",", tracksIds);
-        return spotifyApiClient.getTracksDetails(ids, appendBearer(token)).tracks()
-                .stream()
-                .map(track -> Track.builder()
-                        .name(track.name())
-                        .href(track.external_urls().spotify())
-                        .id(track.id())
-                        .imageUrl(track.album().images().get(0).url())
-                        .build())
-                .collect(Collectors.toList());
+    private List<String> collectTracksIds(SpotifyTopTracksDto topTracksDto) {
+        return topTracksDto.items().stream().map(SpotifyTopTracksDto.Item::id).toList();
     }
 
-    private String appendBearer(String token) {
-        return "Bearer " + token;
+    private List<String> collectArtistsIds(SpotifyTopArtistsDto topArtistsDto) {
+        return topArtistsDto.items().stream().map(SpotifyTopArtistsDto.Item::id).toList();
     }
+
+    private List<Track> collectTracksDetails(SpotifyTopTracksDto topTracksDto) {
+        return topTracksDto.items().stream().map(Mappers::spotifyTopTracksItemToTrack).collect(Collectors.toList());
+    }
+
 }

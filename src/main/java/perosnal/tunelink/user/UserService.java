@@ -36,9 +36,7 @@ public class UserService {
     }
 
     public void persistSpotifyUser(User user, List<Track> tracks) {
-        if (!user.getTracks().isEmpty()) {
-            trackRepository.saveAll(tracks);
-        }
+        trackRepository.saveAll(tracks);
         userRepository.save(user);
     }
 
