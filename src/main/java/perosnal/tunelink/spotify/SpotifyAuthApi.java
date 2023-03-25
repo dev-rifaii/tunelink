@@ -41,16 +41,8 @@ public class SpotifyAuthApi {
         return response.equals("error") ? badRequest().build() : ok(response);
     }
 
-    @PostMapping("/persist")
-    public ResponseEntity<?> persist(@RequestHeader("token") String token) {
-        spotifyApiService.persistUser(token);
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping("/id")
     public ResponseEntity<?> getId(@RequestHeader("token") String token) {
         return ok(spotifyApiService.getIdByToken(token));
     }
-
-
 }

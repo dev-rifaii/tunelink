@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
-import perosnal.tunelink.spotify.dto.TokenRequestDto;
 import perosnal.tunelink.util.HttpRequestSender;
 
 import java.net.URI;
@@ -34,6 +33,7 @@ public class SpotifyAuthorizationService {
     private final HttpRequestSender httpRequestSender;
     private final ObjectMapper objectMapper;
     private final SpotifyAuthorizationClient authorizationClient;
+    private final SpotifyApiService spotifyApiService;
 
     public String authenticationUrl(String baseRoute) {
         UriComponentsBuilder uriComponents = UriComponentsBuilder.fromUriString(BASE_URL + "/authorize")
@@ -51,7 +51,6 @@ public class SpotifyAuthorizationService {
         String parametersString = "code=" + code
                 + "&redirect_uri=" + baseRoute + REDIRECT
                 + "&grant_type=authorization_code";
-        var tokenRequestDto = new TokenRequestDto(code, baseRoute + REDIRECT, "authorization_code");
 
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(new URI(BASE_URL + "/api/token"))
@@ -62,11 +61,13 @@ public class SpotifyAuthorizationService {
 
         HttpResponse<String> response = httpRequestSender.genericRequest(httpRequest);
         if (response.statusCode() == 400) {
-            log.info(response.body());
+            log.warn(response.body());
             return "Error";
         }
         SpotifyToken token = objectMapper.readValue(response.body(), SpotifyToken.class);
         token.setExpires_at(System.currentTimeMillis() + 3600 * 1000);
+
+        spotifyApiService.persistUser(token.access_token);
 
         return objectMapper.writeValueAsString(token);
     }
