@@ -42,20 +42,20 @@ public class SpotifyApiService {
     }
 
     public String getIdByToken(String token) {
-        return spotifyApiClient.getProfile(token).id();
+        return spotifyApiClient.getProfile(appendBearer(token)).id();
     }
 
     private SpotifyUserDto fetchUserFromSpotifyApi(String token) {
-        final SpotifyProfileDto profile = spotifyApiClient.getProfile("Bearer " + token);
-        final List<String> topTrackIds = spotifyApiClient.getTopTracksId(token);
-        final List<String> topArtistsIds = spotifyApiClient.getTopArtistsId(token);
+        final SpotifyProfileDto profile = spotifyApiClient.getProfile(appendBearer(token));
+        final List<String> topTrackIds = spotifyApiClient.getTopTracksId(appendBearer(token));
+        final List<String> topArtistsIds = spotifyApiClient.getTopArtistsId(appendBearer(token));
 
         return new SpotifyUserDto(profile, topTrackIds, topArtistsIds);
     }
 
     private List<Track> getTracksDetails(List<String> tracksIds, String token) {
         String ids = String.join(",", tracksIds);
-        return spotifyApiClient.getTracksDetails(ids, token).tracks()
+        return spotifyApiClient.getTracksDetails(ids, appendBearer(token)).tracks()
                 .stream()
                 .map(track -> Track.builder()
                         .name(track.name())
@@ -64,5 +64,9 @@ public class SpotifyApiService {
                         .imageUrl(track.album().images().get(0).url())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    private String appendBearer(String token) {
+        return "Bearer " + token;
     }
 }

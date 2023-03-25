@@ -24,7 +24,7 @@ public class SpotifyAuthorizationService {
     @Value("${client.secret}")
     private String CLIENT_SECRET;
 
-    private static final String REDIRECT = "/api/v1/auth/callback";
+    private static final String REDIRECT = "/api/v1/spotify-auth/callback";
 
     private static final String BASE_URL = "https://accounts.spotify.com";
 

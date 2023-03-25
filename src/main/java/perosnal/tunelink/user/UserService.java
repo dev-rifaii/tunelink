@@ -3,6 +3,7 @@ package perosnal.tunelink.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import perosnal.tunelink.faker.FakeUserService;
 import perosnal.tunelink.jwt.JwtManager;
 import perosnal.tunelink.track.Track;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 import static perosnal.tunelink.util.Assertions.isTrue;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserService {
 
