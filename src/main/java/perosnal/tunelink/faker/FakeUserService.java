@@ -20,14 +20,13 @@ public class FakeUserService {
     }
 
     public User generateUser(User user) {
-        return User.builder()
-                .id(user.getId() + random.nextInt())
-                .country(user.getCountry())
-                .tracks(user.getTracks().stream().limit(3).collect(Collectors.toList()))
-                .email("fake" + random.nextInt() + "@generated.fk")
-                .imageUrl("https://i.pravatar.cc/300?u=" + random.nextInt())
-                .biography("This user was generated for testing purposes")
-                .build();
+        return new User()
+                .setId(user.getId() + random.nextInt())
+                .setCountry(user.getCountry())
+                .setTracks(user.getTracks().stream().limit(3).collect(Collectors.toList()))
+                .setEmail("fake" + random.nextInt() + "@generated.fk")
+                .setImageUrl("https://i.pravatar.cc/300?u=" + random.nextInt())
+                .setBiography("This user was generated for testing purposes");
     }
 
 }

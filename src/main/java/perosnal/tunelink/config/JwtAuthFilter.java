@@ -7,8 +7,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import perosnal.tunelink.exception.InvalidJwtException;
-import perosnal.tunelink.exception.TuneLinkException;
+import perosnal.tunelink.exceptions.InvalidJwtException;
+import perosnal.tunelink.exceptions.TuneLinkException;
 import perosnal.tunelink.jwt.JwtManager;
 
 import java.io.IOException;
@@ -35,7 +35,6 @@ public class JwtAuthFilter implements Filter {
 
             String jwt = servletRequest.getHeader("Authorization").replace("Bearer ", "");
 
-            jwtManager.validateJwt(jwt);
             String userId = jwtManager.extractSub(jwt);
 
             var requestWrapper = new HeaderMapRequestWrapper(servletRequest);
@@ -54,7 +53,7 @@ public class JwtAuthFilter implements Filter {
             super(request);
         }
 
-        private Map<String, String> headerMap = new HashMap<>();
+        private final Map<String, String> headerMap = new HashMap<>();
 
         public void addHeader(String name, String value) {
             headerMap.put(name, value);

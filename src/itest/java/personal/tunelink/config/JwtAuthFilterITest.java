@@ -32,7 +32,7 @@ public class JwtAuthFilterITest extends IntegrationTestBase {
 
     @Test
     void pingApiCall_ReturnsPong_WhenAuthHeaderIsValid() throws Exception {
-        var jwt = jwtManager.generateToken("101");
+        var jwt = jwtManager.generateJwt("101");
         var userId = jwtManager.extractSub(jwt);
         mockMvc.perform(get("/ping")
                         .header("Authorization", "Bearer " + jwt))

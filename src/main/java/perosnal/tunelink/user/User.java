@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Entity(name = "`user`")
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Accessors(chain = true)
 @Getter
 @Setter
 @JsonIgnoreProperties({"hibernateLazyInitializer"})

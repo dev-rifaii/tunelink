@@ -1,4 +1,4 @@
-package perosnal.tunelink.exception;
+package perosnal.tunelink.exceptions;
 
 public class TuneLinkException extends RuntimeException {
     public TuneLinkException(String message) {

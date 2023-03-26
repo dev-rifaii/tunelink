@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import perosnal.tunelink.util.AuthorizedActionResult;
 
 import java.util.List;
 
@@ -48,11 +47,8 @@ public class UserApi {
     }
 
     @PostMapping("/bio")
-    public ResponseEntity<?> setBio(@RequestHeader String userId, @RequestBody String bio) {
-        if (userService.setBio(userId, bio) == AuthorizedActionResult.SUCCESS) {
-            return noContent().build();
-        }
-        return ResponseEntity.badRequest().build();
+    public void setBio(@RequestHeader String userId, @RequestBody String bio) {
+        userService.updateBiography(userId, bio);
     }
 
     @PostMapping("/force")

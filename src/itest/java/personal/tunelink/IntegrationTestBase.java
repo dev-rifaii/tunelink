@@ -13,7 +13,7 @@ import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 import perosnal.tunelink.Application;
-import perosnal.tunelink.spotify.SpotifyApiClient;
+import perosnal.tunelink.spotify.SpotifyProfileClient;
 import perosnal.tunelink.spotify.SpotifyAuthorizationClient;
 import perosnal.tunelink.spotify.SpotifyAuthorizationService;
 
@@ -26,7 +26,7 @@ public abstract class IntegrationTestBase {
     @MockBean
     protected SpotifyAuthorizationClient spotifyAuthorizationClient;
     @MockBean
-    protected SpotifyApiClient spotifyApiClient;
+    protected SpotifyProfileClient spotifyProfileClient;
     @MockBean
     protected SpotifyAuthorizationService spotifyAuthorizationService;
     @Autowired

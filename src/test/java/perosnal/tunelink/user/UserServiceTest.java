@@ -7,10 +7,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import perosnal.tunelink.exception.TuneLinkException;
+import perosnal.tunelink.exceptions.TuneLinkException;
 import perosnal.tunelink.faker.FakeUserService;
 import perosnal.tunelink.track.TrackRepository;
-import perosnal.tunelink.util.AuthorizedActionResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +21,7 @@ import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -34,25 +33,38 @@ class UserServiceTest {
 
     private final String VALID_USER_ID = validUser().getId();
 
-    @ParameterizedTest(name = "given bio{0} setBio should return {1}")
-    @MethodSource("givenBioToExpectedSetBioResult")
-    void setBio_should_return_expectedResult(final String bio, final AuthorizedActionResult expectedResult) {
-        when(userRepository.getById("")).thenReturn(new User());
+    @Test
+    void updateBiography_ThrowsTuneLinkException_GivenNullBio() {
+        when(userRepository.getById(VALID_USER_ID)).thenReturn(new User());
 
-        final AuthorizedActionResult actualResult = userService.setBio("", bio);
-
-        assertEquals(actualResult, expectedResult);
-    }
-
-    static Stream<Arguments> givenBioToExpectedSetBioResult() {
-        return Stream.of(
-                arguments("", AuthorizedActionResult.FAILURE),
-                arguments("too short", AuthorizedActionResult.FAILURE),
-                arguments(null, AuthorizedActionResult.FAILURE),
-                arguments("123456789Test123456789", AuthorizedActionResult.SUCCESS)
+        assertThrows(
+                TuneLinkException.class,
+                () -> userService.updateBiography(VALID_USER_ID, null),
+                "Biography should be more than 20 characters"
         );
     }
 
+    @Test
+    void updateBiography_ThrowsTuneLinkException_GivenTooShortBio() {
+        when(userRepository.getById(VALID_USER_ID)).thenReturn(new User());
+
+        assertThrows(
+                TuneLinkException.class,
+                () -> userService.updateBiography(VALID_USER_ID, "12345"),
+                "Biography should be more than 20 characters"
+        );
+    }
+
+    @Test
+    void updateBiography_IsSuccessful_GivenValidBio() {
+        String biography = "TwentyCharactersBiographyTesting";
+
+        when(userRepository.getById(VALID_USER_ID)).thenReturn(new User());
+
+        userService.updateBiography(VALID_USER_ID, biography);
+
+        verify(userRepository, times(1)).updateBiography(VALID_USER_ID, biography);
+    }
 
     @ParameterizedTest(name = "given existing match {0} and blocked user {1}, if user is blocked by match={2} and match in filter is {3} result should be empty? {4}")
     @MethodSource("givenMatchesToExpectedFilterMatchesResult")
@@ -75,43 +87,39 @@ class UserServiceTest {
     }
 
     User validUser() {
-        return User.builder()
-                .id("mainUser")
-                .biography("ValidBioWith20CharactersForTesting")
-                .email("mainUser@testing.te")
-                .imageUrl("imageUrl")
-                .matches(new ArrayList<>())
-                .blocked(new ArrayList<>())
-                .tracks(new ArrayList<>(asList("Track1", "Track2", "Track3", "Track4", "Track5")))
-                .country("EE")
-                .build();
+        return new User()
+                .setId("mainUser")
+                .setBiography("ValidBioWith20CharactersForTesting")
+                .setEmail("mainUser@testing.te")
+                .setImageUrl("imageUrl")
+                .setMatches(new ArrayList<>())
+                .setBlocked(new ArrayList<>())
+                .setTracks(new ArrayList<>(asList("Track1", "Track2", "Track3", "Track4", "Track5")))
+                .setCountry("EE");
     }
 
     static User validMatch() {
-        return User.builder()
-                .id("validMatch")
-                .biography("ValidBioWith20CharactersForTesting")
-                .email("validMatch@testing.te")
-                .imageUrl("imageUrl")
-                .matches(new ArrayList<>())
-                .blocked(new ArrayList<>())
-                .tracks(new ArrayList<>(asList("Track1", "Track2", "Track3", "Track4", "Track5")))
-                .country("EE")
-                .build();
+        return new User()
+                .setId("validMatch")
+                .setBiography("ValidBioWith20CharactersForTesting")
+                .setEmail("validMatch@testing.te")
+                .setImageUrl("imageUrl")
+                .setMatches(new ArrayList<>())
+                .setBlocked(new ArrayList<>())
+                .setTracks(new ArrayList<>(asList("Track1", "Track2", "Track3", "Track4", "Track5")))
+                .setCountry("EE");
     }
 
     static User userWithEmptyBio() {
-        return User.builder()
-                .id("emptyBioUser")
-                .email("emptyBio@testing.te")
-                .imageUrl("imageUrl")
-                .matches(new ArrayList<>())
-                .blocked(new ArrayList<>())
-                .tracks(new ArrayList<>(asList("Track1", "Track2", "Track3", "Track4", "Track5")))
-                .country("EE")
-                .build();
+        return new User()
+                .setId("emptyBioUser")
+                .setEmail("emptyBio@testing.te")
+                .setImageUrl("imageUrl")
+                .setMatches(new ArrayList<>())
+                .setBlocked(new ArrayList<>())
+                .setTracks(new ArrayList<>(asList("Track1", "Track2", "Track3", "Track4", "Track5")))
+                .setCountry("EE");
     }
-
 
     static Stream<Arguments> givenMatchesToExpectedFilterMatchesResult() {
         return Stream.of(

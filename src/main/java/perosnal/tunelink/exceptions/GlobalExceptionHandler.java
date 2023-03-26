@@ -1,4 +1,4 @@
-package perosnal.tunelink.exception;
+package perosnal.tunelink.exceptions;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

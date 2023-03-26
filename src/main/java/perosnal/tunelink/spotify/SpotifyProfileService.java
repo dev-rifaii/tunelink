@@ -12,7 +12,6 @@ import perosnal.tunelink.user.User;
 import perosnal.tunelink.user.UserService;
 import perosnal.tunelink.util.Mappers;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,41 +20,38 @@ import static perosnal.tunelink.util.Helpers.appendBearer;
 
 @Service
 @RequiredArgsConstructor
-public class SpotifyApiService {
-
+public class SpotifyProfileService {
 
     private final UserService userService;
-    private final SpotifyApiClient spotifyApiClient;
-
+    private final SpotifyProfileClient spotifyProfileClient;
 
     @Transactional
-    public void persistUser(String token) throws IOException {
+    public void persistUser(String token) {
         final var spotifyUserDto = fetchUserFromSpotifyApi(token);
-        final User user = User.builder()
-                .id(spotifyUserDto.profile().id())
-                .email(spotifyUserDto.profile().email())
-                .tracks(collectTracksIds(spotifyUserDto.topTracks()))
-                .artists(collectArtistsIds(spotifyUserDto.topArtists()))
-                .country(spotifyUserDto.profile().country())
-                .imageUrl(spotifyUserDto.profile()
+        final User user = new User()
+                .setId(spotifyUserDto.profile().id())
+                .setEmail(spotifyUserDto.profile().email())
+                .setTracks(collectTracksIds(spotifyUserDto.topTracks()))
+                .setArtists(collectArtistsIds(spotifyUserDto.topArtists()))
+                .setCountry(spotifyUserDto.profile().country())
+                .setImageUrl(spotifyUserDto.profile()
                         .images()
                         .stream()
                         .findAny()
                         .map(SpotifyProfileDto.SpotifyUserImage::url)
-                        .orElse(null))
-                .build();
+                        .orElse(null));
 
         userService.persistSpotifyUser(user, collectTracksDetails(spotifyUserDto.topTracks()));
     }
 
     public String getIdByToken(String token) {
-        return spotifyApiClient.getProfile(appendBearer(token)).id();
+        return spotifyProfileClient.getProfile(appendBearer(token)).id();
     }
 
     private SpotifyUserDto fetchUserFromSpotifyApi(String token) {
-        final SpotifyProfileDto profile = spotifyApiClient.getProfile(appendBearer(token));
-        final SpotifyTopTracksDto topTracks = spotifyApiClient.getTopTracks(appendBearer(token));
-        final SpotifyTopArtistsDto topArtists = spotifyApiClient.getTopArtistsId(appendBearer(token));
+        final SpotifyProfileDto profile = spotifyProfileClient.getProfile(appendBearer(token));
+        final SpotifyTopTracksDto topTracks = spotifyProfileClient.getTopTracks(appendBearer(token));
+        final SpotifyTopArtistsDto topArtists = spotifyProfileClient.getTopArtistsId(appendBearer(token));
 
         return new SpotifyUserDto(profile, topTracks, topArtists);
     }

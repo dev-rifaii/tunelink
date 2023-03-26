@@ -15,7 +15,7 @@ import static org.springframework.http.ResponseEntity.ok;
 @RestController
 public class SpotifyAuthApi {
 
-    private final SpotifyApiService spotifyApiService;
+    private final SpotifyProfileService spotifyProfileService;
     private final SpotifyAuthorizationService spotifyAuthorizationService;
 
     @GetMapping("/url")
@@ -43,6 +43,6 @@ public class SpotifyAuthApi {
 
     @GetMapping("/id")
     public ResponseEntity<?> getId(@RequestHeader("token") String token) {
-        return ok(spotifyApiService.getIdByToken(token));
+        return ok(spotifyProfileService.getIdByToken(token));
     }
 }
