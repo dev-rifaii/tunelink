@@ -8,8 +8,8 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import perosnal.tunelink.exception.InvalidJwtException;
-import perosnal.tunelink.exception.TuneLinkException;
+import perosnal.tunelink.exceptions.InvalidJwtException;
+import perosnal.tunelink.exceptions.TuneLinkException;
 
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -18,9 +18,10 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.sql.Date;
-import java.time.LocalDate;
 import java.util.Base64;
+
+import static java.sql.Date.valueOf;
+import static java.time.LocalDate.now;
 
 @Slf4j
 @Component
@@ -33,35 +34,27 @@ public class JwtManager {
     @Value("${rsa.private.key}")
     private String privateKey;
 
-
-    public void validateJwt(String jwt) {
-        try {
-            Jwts.parserBuilder()
-                    .setSigningKey(publicKey())
-                    .build()
-                    .parseClaimsJws(jwt);
-        } catch (Exception e) {
-            throw new InvalidJwtException();
-        }
-    }
-
     @SneakyThrows
-    public String generateToken(String userId) {
+    public String generateJwt(String userId) {
         if (userId == null || userId.isEmpty() || userId.isBlank())
             throw new TuneLinkException("User ID can't be empty");
         return Jwts.builder()
                 .setSubject(userId)
-                .setExpiration(Date.valueOf(LocalDate.now().plusDays(1)))
+                .setExpiration(valueOf(now().plusDays(1)))
                 .signWith(getPrivateKey())
                 .compact();
     }
 
     public String extractSub(String jwt) {
-        Jws<Claims> claims = Jwts.parserBuilder()
-                .setSigningKey(publicKey())
-                .build()
-                .parseClaimsJws(jwt);
-        return claims.getBody().get("sub").toString();
+        try {
+            Jws<Claims> claims = Jwts.parserBuilder()
+                    .setSigningKey(publicKey())
+                    .build()
+                    .parseClaimsJws(jwt);
+            return claims.getBody().get("sub").toString();
+        } catch (Exception e) {
+            throw new InvalidJwtException();
+        }
     }
 
     @SneakyThrows

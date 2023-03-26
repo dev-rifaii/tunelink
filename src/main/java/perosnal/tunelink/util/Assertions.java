@@ -1,6 +1,6 @@
 package perosnal.tunelink.util;
 
-import perosnal.tunelink.exception.TuneLinkException;
+import perosnal.tunelink.exceptions.TuneLinkException;
 
 public class Assertions {
 

@@ -10,6 +10,7 @@ import java.net.http.HttpResponse;
 
 @Component
 @RequiredArgsConstructor
+//TODO: Use Feign instead of HttpRequestSender for Spotify auth flow
 public class HttpRequestSender {
 
     private final HttpClient httpClient = HttpClient.newHttpClient();

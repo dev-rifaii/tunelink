@@ -32,7 +32,7 @@ public class SpotifyAuthorizationService {
 
     private final HttpRequestSender httpRequestSender;
     private final ObjectMapper objectMapper;
-    private final SpotifyApiService spotifyApiService;
+    private final SpotifyProfileService spotifyProfileService;
 
     public String authenticationUrl(String baseRoute) {
         UriComponentsBuilder uriComponents = UriComponentsBuilder.fromUriString(BASE_URL + "/authorize")
@@ -66,7 +66,7 @@ public class SpotifyAuthorizationService {
         SpotifyToken token = objectMapper.readValue(response.body(), SpotifyToken.class);
         token.setExpires_at(System.currentTimeMillis() + 3600 * 1000);
 
-        spotifyApiService.persistUser(token.access_token);
+        spotifyProfileService.persistUser(token.getAccess_token());
 
         return objectMapper.writeValueAsString(token);
     }

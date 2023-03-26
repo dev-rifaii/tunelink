@@ -1,6 +1,7 @@
 package perosnal.tunelink.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -21,5 +22,9 @@ public interface UserRepository extends JpaRepository<User, String> {
             "GROUP BY that.user_id HAVING COUNT(*) >= ?2 )", nativeQuery = true)
     List<User> getMatches(String userId, int matchingTracks);
 
+    @Modifying
+    @Query(value = "UPDATE user SET biography = ?2 " +
+            "WHERE id = ?1", nativeQuery = true)
+    void updateBiography(String userId, String biography);
 }
 

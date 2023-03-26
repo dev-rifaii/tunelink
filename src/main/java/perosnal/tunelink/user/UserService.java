@@ -4,10 +4,10 @@ package perosnal.tunelink.user;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import perosnal.tunelink.exceptions.TuneLinkException;
 import perosnal.tunelink.faker.FakeUserService;
 import perosnal.tunelink.track.Track;
 import perosnal.tunelink.track.TrackRepository;
-import perosnal.tunelink.util.AuthorizedActionResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -52,14 +52,11 @@ public class UserService {
     }
 
 
-    public AuthorizedActionResult setBio(String userId, String bio) {
-        User user = userRepository.getById(userId);
-        if (bio != null && bio.length() > 20) {
-            user.setBiography(bio);
-            userRepository.save(user);
-            return AuthorizedActionResult.SUCCESS;
+    public void updateBiography(String userId, String bio) {
+        if (bio == null || bio.length() < 20) {
+            throw new TuneLinkException("Biography should be more than 20 characters");
         }
-        return AuthorizedActionResult.FAILURE;
+        userRepository.updateBiography(userId, bio);
     }
 
     //TODO filter matches on database level

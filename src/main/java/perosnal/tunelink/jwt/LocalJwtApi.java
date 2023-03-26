@@ -20,7 +20,7 @@ public class LocalJwtApi {
 
     @GetMapping
     public ResponseEntity<?> getToken(@RequestHeader String userId) {
-        String token = jwtManager.generateToken(userId);
+        String token = jwtManager.generateJwt(userId);
         return ok(token);
     }
 }

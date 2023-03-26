@@ -13,7 +13,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
  * See <a href="https://developer.spotify.com/documentation/web-api/reference/#/">reference documentation</a> for more details.
  */
 @FeignClient(name = "Spotify-API", url = "https://api.spotify.com/v1")
-public interface SpotifyApiClient {
+public interface SpotifyProfileClient {
 
     @RequestMapping(method = GET, value = "/me")
     SpotifyProfileDto getProfile(@RequestHeader(name = "Authorization") String token);

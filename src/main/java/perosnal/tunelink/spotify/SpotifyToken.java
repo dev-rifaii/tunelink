@@ -9,7 +9,8 @@ import lombok.ToString;
 @ToString
 public class SpotifyToken {
 
-    String access_token;
-    String refresh_token;
-    Long expires_at;
+    private String access_token;
+    private String refresh_token;
+    private Long expires_at;
+
 }
